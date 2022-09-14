@@ -398,13 +398,13 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
     plt.yticks([1e-21, 1e-18, 1e-15, 1e-12, 1e-9])
     #leg = plt.legend(loc='lower right')
 
-    print "Plot Inventory:"
-    print "\tNumber of pulsars:", (periods.size + numhl)
-    print "\tNumber highlighted:", numhl
-    print "\tNumber of RRATs:", periods_rrat.size
-    print "\tNumber of magnetars:", periods_mag.size
-    print "\tNumber of binaries:", periods_bnry.size
-    print "\tNumber of SNR associations:", periods_snr.size
+    print("Plot Inventory:")
+    print("\tNumber of pulsars:", (periods.size + numhl))
+    print("\tNumber highlighted:", numhl)
+    print("\tNumber of RRATs:", periods_rrat.size)
+    print("\tNumber of magnetars:", periods_mag.size)
+    print("\tNumber of binaries:", periods_bnry.size)
+    print("\tNumber of SNR associations:", periods_snr.size)
 
 def draw_lines(bfields=[], edots=[], ages=[], show_labels=True):
     """Draw multiple lines of constant B-field, edot and age.
@@ -441,12 +441,12 @@ def draw_lines(bfields=[], edots=[], ages=[], show_labels=True):
     
 
 def quit():
-    print "Quiting..."
+    print("Quiting...")
     sys.exit(0)
 
 
 def savefigure(savefn='./ppdot.png'):
-    print "Saving plot to %s" % savefn
+    print("Saving plot to %s" % savefn)
     plt.savefig(savefn, orientation='landscape', papertype='letter', facecolor='none')
 
 
@@ -457,11 +457,11 @@ def mousepress(event):
         p = event.xdata
         pdot = event.ydata
         bfield, age, edot = params_from_ppdot(p, pdot)
-        print "Coordinates:"
-        print "\tPeriod (s): %g, P-dot (s/s): %g" % (p, pdot)
-        print "\tB-field (G): %g" % bfield
-        print "\tAge (yr): %g" % age
-        print "\tE-dot (erg/s): %g" % edot
+        print("Coordinates:")
+        print("\tPeriod (s): %g, P-dot (s/s): %g" % (p, pdot))
+        print("\tB-field (G): %g" % bfield)
+        print("\tAge (yr): %g" % age)
+        print("\tE-dot (erg/s): %g" % edot)
 
 
 def pick(event):
@@ -473,25 +473,25 @@ def pick(event):
     if event.mouseevent.button == 1 and len(event.ind) == 1:
         label = event.artist.get_label()
         index = event.ind[0]
-        print "Pulsar selected: ",
+        print("Pulsar selected: ", end=' ')
         if label == 'pulsars':
             selected = pulsars[index]
         elif label == 'highlight':
             selected = highlight[index]
         else:
-            print "What was selected?! Error?"
+            print("What was selected?! Error?")
             return
         if event.mouseevent.key == 'shift':
             # provide complete information
-            print selected.get_info(extended=True)
+            print(selected.get_info(extended=True))
         else:
-            print selected.get_info(extended=False)
+            print(selected.get_info(extended=False))
 
 
 def keypress(event):
     """Event handler for KeyEvent.
     """
-    if type(event.key) == types.StringType:
+    if type(event.key) == bytes:
         
         if event.key.lower() == 'q':
             # Quit program
@@ -501,114 +501,114 @@ def keypress(event):
             savefigure()
         elif event.key.lower() == 'z':
             # Toggle zoom mode
-            print "Toggling zoom mode..."
+            print("Toggling zoom mode...")
             event.canvas.toolbar.zoom()
         elif event.key.lower() == 'o':
             # Restore plot to original view
-            print "Restoring plot..."
+            print("Restoring plot...")
             event.canvas.toolbar.home()
         elif event.key.lower() == ',' or event.key.lower() == '<':
             # Go back to previous plot view
-            print "Going back..."
+            print("Going back...")
             event.canvas.toolbar.back()
         elif event.key.lower() == '.' or event.key.lower() == '>':
             # Go forward to next plot view
-            print "Going forward..."
+            print("Going forward...")
             event.canvas.toolbar.forward()
         elif event.key.lower() == 'b':
             # Mark binaries
             global scatt_binaries
             global scatt_binaries_pnts
             if scatt_binaries is not None:
-                print "Toggling binaries..."
+                print("Toggling binaries...")
                 visible = scatt_binaries.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_binaries.set_visible(not visible)
                 scatt_binaries_pnts.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No binaries)"
+                print("(No binaries)")
         elif event.key.lower() == 'r':
             # Mark RRATs
             global scatt_rrats
             global scatt_rrats_pnts
             if scatt_rrats is not None:
-                print "Toggling RRATs..."
+                print("Toggling RRATs...")
                 visible = scatt_rrats.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_rrats.set_visible(not visible)
                 scatt_rrats_pnts.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No RRATs)"
+                print("(No RRATs)")
         elif event.key.lower() == 'm':
             # Mark magnetars
             global scatt_magnetars
             global scatt_magnetars_pnts
             if scatt_magnetars is not None:
-                print "Toggling magnetars..."
+                print("Toggling magnetars...")
                 visible = scatt_magnetars.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_magnetars.set_visible(not visible)
                 scatt_magnetars_pnts.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No magnetars)"
+                print("(No magnetars)")
         elif event.key.lower() == 'g':
             # Mark sgrs
             global scatt_sgr
             if scatt_sgr is not None:
-                print "Toggling SGRs..."
+                print("Toggling SGRs...")
                 visible = scatt_sgr.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_sgr.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No SGRs)"
+                print("(No SGRs)")
         elif event.key.lower() == 'a':
             # Mark axps
             global scatt_axp
             if scatt_axp is not None:
-                print "Toggling AXPs..."
+                print("Toggling AXPs...")
                 visible = scatt_axp.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_axp.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No AXPs)"
+                print("(No AXPs)")
         elif event.key.lower() == 'n':
             # Mark SNRs
             global scatt_snrs
             global scatt_snrs_pnts
             if scatt_snrs is not None:
-                print "Toggling SNR associations..."
+                print("Toggling SNR associations...")
                 visible = scatt_snrs.get_visible()
                 # visible is True/False. 'not visible' will toggle state.
                 scatt_snrs.set_visible(not visible)
                 scatt_snrs_pnts.set_visible(not visible)
                 event.canvas.draw()
             else:
-                print "(No SNR associations)"
+                print("(No SNR associations)")
         elif event.key == 'h':
             # Display help
-            print "Helping..."
-            print "-"*80
-            print "Help - Hotkeys definitions:"
-            print "\th - Display this help"
-            print "\tq - Quit"
-            print "\ts - Save current plot to PostScript file"
-            print "\tz - Toggle Zoom-mode on/off"
-            print "\to - Go to original view"
-            print "\t< - Go to previous view"
-            print "\t> - Go to next view"
-            print "\tb - Toggle binary marking"
-            print "\tr - Toggle RRAT marking"
-            print "\tm - Toggle magnetar marking"
-            print "\tn - Toggle SNR marking"
-            print "\t[Left mouse] - Select pulsar (display info in terminal)"
-            print "\t             - Select zoom region (if Zoom-mode is on)"
-            print "\t[Middle mouse] - Display P, P-dot, B, E-dot and age at mouse pointer"
-            print "-"*80
+            print("Helping...")
+            print("-"*80)
+            print("Help - Hotkeys definitions:")
+            print("\th - Display this help")
+            print("\tq - Quit")
+            print("\ts - Save current plot to PostScript file")
+            print("\tz - Toggle Zoom-mode on/off")
+            print("\to - Go to original view")
+            print("\t< - Go to previous view")
+            print("\t> - Go to next view")
+            print("\tb - Toggle binary marking")
+            print("\tr - Toggle RRAT marking")
+            print("\tm - Toggle magnetar marking")
+            print("\tn - Toggle SNR marking")
+            print("\t[Left mouse] - Select pulsar (display info in terminal)")
+            print("\t             - Select zoom region (if Zoom-mode is on)")
+            print("\t[Middle mouse] - Display P, P-dot, B, E-dot and age at mouse pointer")
+            print("-"*80)
             
 
 def create_plot(pulsars, highlight=[], interactive=True, **kwargs):
@@ -632,7 +632,7 @@ def create_plot(pulsars, highlight=[], interactive=True, **kwargs):
     if interactive:
         # Before setting up our own event handlers delete matplotlib's
         # default 'key_press_event' handler.
-        defcids = fig.canvas.callbacks.callbacks['key_press_event'].keys()
+        defcids = list(fig.canvas.callbacks.callbacks['key_press_event'].keys())
         for cid in defcids:
             fig.canvas.callbacks.disconnect(cid)
         
@@ -648,13 +648,13 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
     """Parse list of pulsars.
         Return a list of Pulsar objects.
     """
-    print indent+"Parsing file (%s)" % psrfn
+    print(indent+"Parsing file (%s)" % psrfn)
     pulsars = []
     nonplottable = 0
     
     # Check if file exists
     if not os.path.exists(psrfn):
-        print indent+"    File not found: %s" % psrfn
+        print(indent+"    File not found: %s" % psrfn)
         return pulsars
     
     psrfile = open(psrfn, 'r')
@@ -667,7 +667,7 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
         if split_line[0].upper() == 'INCLUDE':
             # include pulsars from other files.
             for fn in split_line[1:]:
-                print indent+"    INCLUDE'ing another file."
+                print(indent+"    INCLUDE'ing another file.")
                 newindent=indent+'    '
                 dir = os.path.split(psrfn)[0]
                 pulsars += parse_pulsar_file(os.path.join(dir,fn), indent=newindent)
@@ -735,8 +735,8 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
             psrtype = split_line[8]
         pulsars.append(Pulsar(name, p, pdot, raj, decj, dm, \
                                 binarytype, assoc, psrtype, pdot_uplim=pdot_uplim))
-    print indent+"    Number of pulsars that cannot be plotted (no P or Pdot): %d" % nonplottable
-    print indent+"    Done parsing file."
+    print(indent+"    Number of pulsars that cannot be plotted (no P or Pdot): %d" % nonplottable)
+    print(indent+"    Done parsing file.")
     return pulsars
 
 
@@ -770,7 +770,7 @@ def main():
     for hl in highlight:
         if hl.name in psr_dict:
             del psr_dict[hl.name]
-    pulsars = psr_dict.values()
+    pulsars = list(psr_dict.values())
     if len(pulsars)+len(highlight):
         create_plot(pulsars, highlight, binaries=args.binaries, \
                 magnetars=args.magnetars, rrats=args.rrats, \

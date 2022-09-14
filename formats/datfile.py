@@ -13,7 +13,7 @@ import scipy.interpolate as interp
 
 import psr_utils
 import infodata
-import pulse
+from . import pulse
 
 # Define constants and default values
 DTYPE = 'float32'       # binary data in PRESTO's .dat files 
@@ -241,7 +241,7 @@ class Datfile:
         # Initialize
         self.rewind()
         if time_to_skip > 0.0:
-            print "Burning %f s at start of obs." % time_to_skip
+            print("Burning %f s at start of obs." % time_to_skip)
             self.read_Tseconds(time_to_skip)
 
         pulse_number = 1

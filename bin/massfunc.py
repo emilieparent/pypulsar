@@ -37,11 +37,11 @@ p = np.array([1,a,b,c])
 roots = np.roots(p)
 realroots = np.real(roots[np.isreal(roots)])
 if realroots.size == 1:
-    print "Minimum companion mass (assuming Mp=%g, i=%g): %f Msun" % \
-                (options.mp, options.inclination, realroots[0])
+    print("Minimum companion mass (assuming Mp=%g, i=%g): %f Msun" % \
+                (options.mp, options.inclination, realroots[0]))
 else:
-    print "Minimum companion mass (assuming Mp=%g, i=%g): " % \
-                (options.mp, options.inclination)
-    print "\t** Multiple real-valued solutions **"
-    print "\t%f Msun" % realroots
+    print("Minimum companion mass (assuming Mp=%g, i=%g): " % \
+                (options.mp, options.inclination))
+    print("\t** Multiple real-valued solutions **")
+    print("\t%f Msun" % realroots)
     

@@ -45,7 +45,7 @@ def write_data(infbfile, outfbfile):
         # Read data
         data = infbfile.read_sample()
         # Filter Data
-        data = filter(data)
+        data = list(filter(data))
         # Write Data
         data.tofile(outfbfile)
 

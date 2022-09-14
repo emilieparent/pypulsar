@@ -22,12 +22,12 @@ post_sum_processing = []
 def main():
     pulsefiles = args + glob.glob(options.glob_expr)
     if len(pulsefiles) < 2:
-        print pulsefiles
+        print(pulsefiles)
         sys.stderr.write("Only %d pulse files provided. Exiting!\n" % \
                                 len(pulsefiles))
         sys.exit(1)
 
-    print "Summing %d profiles" % len(pulsefiles)
+    print("Summing %d profiles" % len(pulsefiles))
    
     psum = pulse.read_pulse_from_file(pulsefiles[0]) + \
             pulse.read_pulse_from_file(pulsefiles[1])
@@ -38,14 +38,14 @@ def main():
     for procstep in post_sum_processing:
         method_name, method_args = procstep
         method = eval('psum.%s' % method_name)
-        if type(method_args)==types.TupleType:
-            print "Applying %s with arguments %s" % (method_name, method_args)
+        if type(method_args)==tuple:
+            print("Applying %s with arguments %s" % (method_name, method_args))
             method(*method_args)
         elif method_args is None:
-            print "Applying %s" % method_name
+            print("Applying %s" % method_name)
             method()
         else:
-            print "Applying %s with argument %s" % (method_name, method_args)
+            print("Applying %s with argument %s" % (method_name, method_args))
             method(method_args)
 
     # Write to file

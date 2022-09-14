@@ -29,14 +29,14 @@ def main():
     # Open output file
     outfile = open(options.outname+".dat", 'wb')
     numsamps = 0
-    print "Working on", os.path.split(datfiles[0].datfn)[1]
+    print("Working on", os.path.split(datfiles[0].datfn)[1])
     dtype = datfiles[0].dtype
     data = datfiles[0].read_all()
     datfiles[0].close()
     data.tofile(outfile)
     numsamps += data.size
     for ii in range(1,len(datfiles)):
-        print "Working on", os.path.split(datfiles[ii].datfn)[1]
+        print("Working on", os.path.split(datfiles[ii].datfn)[1])
         # Calculate number of padvalues required
         mjd_diff = datfiles[ii].currmjd_actual - datfiles[ii-1].currmjd_actual
         sec_diff = mjd_diff * psr_utils.SECPERDAY
@@ -48,10 +48,10 @@ def main():
         padval = np.median(data)
         padvals = np.ones(numpadvals, dtype=dtype)*padval
         if options.debug:
-            print "Padding by %d samples" % numpadvals
-            print "Value used for padding: %g" % padval
-            print "Padding by integer number of bins caused %f bins to be " \
-                    "discarded/added" % (samp_diff-numpadvals)
+            print("Padding by %d samples" % numpadvals)
+            print("Value used for padding: %g" % padval)
+            print("Padding by integer number of bins caused %f bins to be " \
+                    "discarded/added" % (samp_diff-numpadvals))
         padvals.tofile(outfile)
         numsamps += padvals.size
 
@@ -69,7 +69,7 @@ def main():
     inf.N = numsamps
     inf.tofile(options.outname+'.inf')
 
-    print "Total number of samples written:", numsamps
+    print("Total number of samples written:", numsamps)
 
 if __name__=='__main__':
     parser = optparse.OptionParser(usage='%prog [options] infiles', \

@@ -9,8 +9,8 @@ import warnings
 import types
 import numpy as np
 
-import protractor
-import calendar
+from . import protractor
+from . import calendar
 
 def ha_from_lst(lst, ra):
     """Given local sidereal time (lst) and right ascension (ra),
@@ -345,19 +345,19 @@ def precess(ra, decl, inequinox, outequinox, \
     inJD = calendar.date_to_JD(inequinox, 0, 0, gregorian=True)
     outJD = calendar.date_to_JD(outequinox, 0, 0, gregorian=True)
 
-    print inJD, outJD
+    print(inJD, outJD)
 
     intau = (inJD - 2415020.313)/36524.2199
     outtau = (outJD - inJD)/36524.2199
 
-    print intau, outtau
+    print(intau, outtau)
 
     # The following 3 variables are in arcseconds
     zeta = (2304.250 + 1.396*intau)*outtau + 0.302*outtau**2 + 0.018*outtau**3
     z = zeta + 0.791*outtau**2 + 0.001*outtau**3
     theta = (2004.682 - 0.853*intau)*outtau - 0.426*outtau**2 - 0.042*outtau**3
 
-    print zeta, z, theta
+    print(zeta, z, theta)
 
     # Convert to radians
     zeta = zeta/3600*protractor.DEGTORAD
@@ -368,7 +368,7 @@ def precess(ra, decl, inequinox, outequinox, \
     B = np.cos(theta)*np.cos(decl)*np.cos(ra+zeta)-np.sin(theta)*np.sin(decl)
     C = np.sin(theta)*np.cos(decl)*np.cos(ra+zeta)+np.cos(theta)*np.sin(decl)
 
-    print A, B, C
+    print(A, B, C)
 
     outra = np.arctan2(A, B)+z
     outdecl = np.arcsin(C)
@@ -396,7 +396,7 @@ def angsep(ra1, dec1, ra2, dec2, input="sexigesimal", output="deg"):
     
     Possible values for input and output are "sexigesimal", "deg" and "rad".
     """
-    if type(input)==types.StringType:
+    if type(input)==bytes:
         # input type is same for both sets of coords
         input1 = input
         input2 = input

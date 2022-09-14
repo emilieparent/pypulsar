@@ -43,7 +43,7 @@ class Candidate(object):
         self.dmhits.append(DMHit(dm, snr, sigma))
 
     def __str__(self):
-        cand = self.accelfile + ':' + `self.candnum`
+        cand = self.accelfile + ':' + repr(self.candnum)
         result = "%-65s   %7.2f  %6.2f  %6.2f  %s   %7.1f  " \
                  "%7.1f  %12.6f  %10.2f  %8.2f  (%d)\n" % \
             (cand, self.dm, self.snr, self.sigma, \
@@ -92,7 +92,7 @@ def write_candlist(candlist, fn=sys.stdout):
         NOTE: if fn is an already-opened file-object it will not be
                 closed by this function.
     """
-    if type(fn) == types.StringType:
+    if type(fn) == bytes:
         toclose = True
         file = open(fn, 'w')
     else:
@@ -121,7 +121,7 @@ def parse_candlist(candlistfn):
         Outputs:
             list of Candidates objects
     """
-    if type(candlistfn) == types.StringType:
+    if type(candlistfn) == bytes:
         candlist = open(candlistfn, 'r')
     else:
         # candlistfn is actually a file-object

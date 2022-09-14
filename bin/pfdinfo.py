@@ -20,7 +20,7 @@ def main():
                 else:
                     vals.append("%s" % getattr(pfd, attr))
             lines.append(args.sep.join(vals).decode('string-escape'))
-        print "\n".join(lines)
+        print("\n".join(lines))
 
 
 if __name__ == '__main__':

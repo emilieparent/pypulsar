@@ -40,7 +40,7 @@ def main():
             filenames += [fn.strip() for fn in f.readlines()]
     
     if not options.quiet:
-        print "Number of files to consider: %d" % len(filenames)
+        print("Number of files to consider: %d" % len(filenames))
 
     # Initialise lists to store energies
     on_energies = []
@@ -57,7 +57,7 @@ def main():
         
     on_mean = np.mean(on_energies)
     if not options.quiet:
-        print "Average on-pulse energy: %f" % on_mean
+        print("Average on-pulse energy: %f" % on_mean)
     on = on_energies/on_mean
     off = off_energies/on_mean
     
@@ -65,7 +65,7 @@ def main():
     on = on[on>-5]
     
     if not options.quiet:
-        print "Number of pulses being plotted: %d" % len(on)
+        print("Number of pulses being plotted: %d" % len(on))
     
     # Plot results
     fig = plt.figure()

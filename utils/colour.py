@@ -62,16 +62,16 @@ def cset(preset=None, fg='default', bg='default', **attr):
         if preset in preset_codes:
             current_code = preset_codes[preset]
         else:
-            print "Unrecognized preset color code:", preset
+            print("Unrecognized preset color code:", preset)
     else:
         set_attr = []
         error = False
-        for a in attr.keys():
+        for a in list(attr.keys()):
             if (a in attributes):
                 if (attr[a]):
                     set_attr.append(str(attributes[a]))
             else:
-                print "Unrecognized attribute:", a
+                print("Unrecognized attribute:", a)
                 error = True
         
         if len(set_attr) == 0:
@@ -79,18 +79,18 @@ def cset(preset=None, fg='default', bg='default', **attr):
         
         if fg in fg_colours:
             fg_val = fg_colours[fg]
-        elif type(fg) == types.IntType or fg.isdigit():
+        elif type(fg) == int or fg.isdigit():
             fg_val = str(fg)
         else:
-            print "Unrecognized foreground colour:", fg
+            print("Unrecognized foreground colour:", fg)
             error = True
             
         if bg in bg_colours:
             bg_val = bg_colours[bg]
-        elif type(bg) == types.IntType or bg.isdigit():
+        elif type(bg) == int or bg.isdigit():
             bg_val = str(bg)
         else:
-            print "Unrecognized background colour:", bg
+            print("Unrecognized background colour:", bg)
             error = True
         
         if error:
@@ -137,7 +137,7 @@ def cprint(s, *override, **kwoverride):
     Keyword is optional. It will override the current
     colour code.
     """
-    print cstring(s, *override, **kwoverride)
+    print(cstring(s, *override, **kwoverride))
 
 
 def show_dictionary():
@@ -153,8 +153,8 @@ def show_status():
         Print global variables.
     """
     # Should we set colour to default?
-    print "DEFAULT_CODE:", repr(DEFAULT_CODE)
-    print "current_code:", repr(current_code)
+    print("DEFAULT_CODE:", repr(DEFAULT_CODE))
+    print("current_code:", repr(current_code))
     # Should we print a list of all keywords that
     # match the current code?
 

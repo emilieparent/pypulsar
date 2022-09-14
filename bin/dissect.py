@@ -54,12 +54,12 @@ def main():
     else:
         shift_time = 0.0
 
-    print "Searching %s for single pulses." % timeseries.datfn
+    print("Searching %s for single pulses." % timeseries.datfn)
 
     if options.parfile is not None:
-        print "Using parfile: %s" % options.parfile
+        print("Using parfile: %s" % options.parfile)
         # generate polycos
-        print "Automatically generating polycos..."
+        print("Automatically generating polycos...")
         polycos = mypolycos.create_polycos_from_inf(options.parfile, timeseries.infdata)
         mjd = timeseries.infdata.epoch
         mjdi = int(mjd) # integer part of mjd
@@ -88,7 +88,7 @@ def main():
         get_period = lambda mjd: 1.0/polycos.get_phs_and_freq(int(mjd), \
                                                                mjd-int(mjd))[1]
     elif options.polycofile is not None:
-        print "Using polycos file: %s" % options.polycos
+        print("Using polycos file: %s" % options.polycos)
         polycos = mypolycos.polycos(options.polycos)
         mjd = timeseries.infdata.epoch
         mjdi = int(mjd) # integer part of mjd
@@ -117,18 +117,18 @@ def main():
         get_period = lambda mjd: 1.0/polycos.get_phs_and_freq(int(mjd), \
                                                                mjd-int(mjd))[1]
     elif options.period is not None:
-        print "Using constant period: %f" % options.period
+        print("Using constant period: %f" % options.period)
         if options.shift_phase != 0.0:
             shift_time = options.shift_phase * options.period
         get_period = lambda mjd: options.period
     else:
         raise ValueError("Unknown option for reading periods.")
 
-    print "On-pulse regions will be set to: %s" % \
-            ','.join(['%s:%s' % t for t in options.on_pulse_regions])
-    print "Boxcar widths to be used: %s" % \
-            ', '.join(['%s' % w for w in options.widths])
-    print "Single-pulse SNR threshold: %s" % options.threshold
+    print("On-pulse regions will be set to: %s" % \
+            ','.join(['%s:%s' % t for t in options.on_pulse_regions]))
+    print("Boxcar widths to be used: %s" % \
+            ', '.join(['%s' % w for w in options.widths]))
+    print("Single-pulse SNR threshold: %s" % options.threshold)
 
     # Loop over pulses in timeseries. Examine pulses one at a time.
     good_pulses = []
@@ -173,14 +173,14 @@ def main():
                     quiet=options.quiet)
     if options.create_output_files and len(good_pulses) > 0:
         if options.create_text_files:
-            print "Writing pulse text files..."
+            print("Writing pulse text files...")
             write_pulses(good_pulses, timeseries)
         if options.create_plot_files:
-            print "Creating pulse plots..."
+            print("Creating pulse plots...")
             plot_pulses(good_pulses, timeseries, options.downfactor, 
                             widths=widths)
         if options.create_joydiv_plot:
-            print "Making JoyDiv plot..."
+            print("Making JoyDiv plot...")
             joy_division_plot(good_pulses, timeseries, options.downfactor, \
                                         options.heightstretch)
 
@@ -188,10 +188,10 @@ def main():
     if (options.polycofile is not None or options.parfile is not None) and \
                 options.write_toas and len(good_pulses) > 0:
         numtoas = 0
-        print "Generating TOAs. Please wait..."
-        print "TOA threshold:", options.toa_threshold
-        print "Min number of pulses for a TOA:", options.min_pulses
-        print "Profile template used:", options.template
+        print("Generating TOAs. Please wait...")
+        print("TOA threshold:", options.toa_threshold)
+        print("Min number of pulses for a TOA:", options.min_pulses)
+        print("Profile template used:", options.template)
         # Extract second column from template file
         # First column is index
         template = np.loadtxt(options.template, usecols=(1,))
@@ -225,9 +225,9 @@ def main():
                     current_pulse.write_to_file("TOA%d" % numtoas)
                 current_pulse = None
                 numpulses = 0
-        print "Number of TOAs: %d" % numtoas
-        print "Number of pulses thrown out because 'min pulses' requirement " \
-                "or SNR threshold not met: %d" % numpulses
+        print("Number of TOAs: %d" % numtoas)
+        print("Number of pulses thrown out because 'min pulses' requirement " \
+                "or SNR threshold not met: %d" % numpulses)
 
 
 def plot_toa(numtoa, pulse, template=None, pulseshift=0, \
@@ -369,12 +369,12 @@ def print_report(pulses, numpulses, nummasked, snrs=None, notes=None, \
                     quiet=False):
     """Print a report given the pulses provided.
     """
-    print "Autopsy report:"
-    print "\tTotal number of pulses searched: %s" % numpulses
-    print "\tNumber of pulses thrown out: %s (%5.2f%%)" % (nummasked, \
-                float(nummasked)/numpulses*100)
-    print "\tNumber of good pulses found: %s (%5.2f%%)" % (len(pulses), \
-                float(len(pulses))/numpulses*100)
+    print("Autopsy report:")
+    print("\tTotal number of pulses searched: %s" % numpulses)
+    print("\tNumber of pulses thrown out: %s (%5.2f%%)" % (nummasked, \
+                float(nummasked)/numpulses*100))
+    print("\tNumber of good pulses found: %s (%5.2f%%)" % (len(pulses), \
+                float(len(pulses))/numpulses*100))
     if len(pulses) > 0 and not quiet:
         use_snrs = ""
         use_notes = ""
@@ -382,9 +382,9 @@ def print_report(pulses, numpulses, nummasked, snrs=None, notes=None, \
             use_snrs = "SNR"
         if notes is not None and len(notes) == len(pulses):
             use_notes = "Notes"
-        print "%s%s%s%s%s%s" % ("#".center(7), "MJD".center(15), \
+        print("%s%s%s%s%s%s" % ("#".center(7), "MJD".center(15), \
                                     "Time".center(11), "Duration".center(13), \
-                                    use_snrs.center(9), use_notes)
+                                    use_snrs.center(9), use_notes))
         for i, pulse in enumerate(pulses):
             sys.stdout.write(("%d" % pulse.number).center(7))
             sys.stdout.write(("%5.4f" % pulse.mjd).center(15))

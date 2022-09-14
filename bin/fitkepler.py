@@ -42,23 +42,23 @@ def read_pfds(fns):
                 maxt = 300#np.sqrt((0.25*b.p0_bary)**2 - b.p0err_bary**2)/b.p1err_bary
                 tstep = maxt/options.extendnum
                 if options.debuglevel:
-                    print "Bary Period (s): %g +/- %g" % (b.p0_bary, b.p0err_bary)
-                    print "Bary P-dot (s/s): %g +/- %g" % (b.p1_bary, b.p1err_bary)
-                    print "Bary Epoch (MJD): %.12f" % p.bepoch
-                    print "    Period points (included phantom period measurements)"
-                    print "    (T_max = %g (s), T_step = %g (s))" % (maxt, tstep)
+                    print("Bary Period (s): %g +/- %g" % (b.p0_bary, b.p0err_bary))
+                    print("Bary P-dot (s/s): %g +/- %g" % (b.p1_bary, b.p1err_bary))
+                    print("Bary Epoch (MJD): %.12f" % p.bepoch)
+                    print("    Period points (included phantom period measurements)")
+                    print("    (T_max = %g (s), T_step = %g (s))" % (maxt, tstep))
                 for ii in np.arange(-options.extendnum, options.extendnum+1):
                     ps.append(b.p0_bary+b.p1_bary*ii*tstep)
                     perrs.append(np.sqrt((b.p0err_bary)**2+(ii*tstep*b.p1err_bary)**2)*options.efac)
                     mjds.append(p.bepoch+ii*tstep/psr_utils.SECPERDAY)
-                    print "  %.15f  %.10f   %.10f" % (mjds[-1], ps[-1]*1000, perrs[-1]*1000)
+                    print("  %.15f  %.10f   %.10f" % (mjds[-1], ps[-1]*1000, perrs[-1]*1000))
                     if options.debuglevel:
-                        print "   P (s): %g +/- %g @ MJD=%.12f" % (ps[-1], perrs[-1], mjds[-1])
+                        print("   P (s): %g +/- %g @ MJD=%.12f" % (ps[-1], perrs[-1], mjds[-1]))
             else:
                 ps.append(b.p0_bary)
                 perrs.append(b.p0err_bary*options.efac)
                 mjds.append(p.bepoch)
-                print "  %.15f  %.10f   %.10f" % (mjds[-1], ps[-1]*1000, perrs[-1]*1000)
+                print("  %.15f  %.10f   %.10f" % (mjds[-1], ps[-1]*1000, perrs[-1]*1000))
     return np.array(ps), np.array(perrs), np.array(mjds)
 
 def read_textfile(fns):
@@ -83,7 +83,7 @@ def read_textfile(fns):
 
 def print_params(params):
     for name, val in zip(PARAMNAMES, params):
-        print "\t%s: %r" % (name, val)
+        print("\t%s: %r" % (name, val))
 
 def kepler_function(asini, p_orb, p_psr, T0, ecc=0, peri=0):
     """
@@ -100,11 +100,11 @@ def kepler_function(asini, p_orb, p_psr, T0, ecc=0, peri=0):
         global count
         count += 1
         if options.debuglevel > 1:
-            print "Evaluation #:", count
-            print "Params:"
+            print("Evaluation #:", count)
+            print("Params:")
             print_params((asini, p_orb, p_psr, T0, ecc, peri))
         if options.debuglevel > 2:
-            print "\tMJD:", mjd
+            print("\tMJD:", mjd)
         p_orb_sec = p_orb*psr_utils.SECPERDAY # orbital period in seconds
         orb_freq_hz = psr_utils.TWOPI/p_orb_sec # Orbital angular frequency in hertz
         orb_freq = psr_utils.TWOPI/p_orb # Orbital angular frequency
@@ -117,15 +117,15 @@ def kepler_function(asini, p_orb, p_psr, T0, ecc=0, peri=0):
         observed_p_psr = p_psr*(1+velocity) # velocity in units of C
         
         if options.debuglevel > 2:
-            print "Intermediate calculations:"
-            print "\tp_orb_sec:", p_orb_sec
-            print "\torb_freq_hz:", orb_freq_hz
-            print "\torb_freq:", orb_freq
-            print "\tma:", ma
-            print "\tE:", E
-            print "\tA:", A
-            print "\tvelocity:", velocity
-            print "\tobserved_p_psr:", observed_p_psr
+            print("Intermediate calculations:")
+            print("\tp_orb_sec:", p_orb_sec)
+            print("\torb_freq_hz:", orb_freq_hz)
+            print("\torb_freq:", orb_freq)
+            print("\tma:", ma)
+            print("\tE:", E)
+            print("\tA:", A)
+            print("\tvelocity:", velocity)
+            print("\tobserved_p_psr:", observed_p_psr)
         return observed_p_psr
     return func
 
@@ -177,7 +177,7 @@ def fit(params, data):
     errorfunction = lambda p, vals, errs: np.ravel((kepler_function(*p)(mjds) - vals)/errs)
     if options.debuglevel > 0:
          p, cov_x, infodict, mesg, success = opt.leastsq(errorfunction, params, maxfev=options.maxfev, full_output=1, args=(ps, perrs))
-         print "Covariance matrix:\n", cov_x
+         print("Covariance matrix:\n", cov_x)
     else:
          p, success = opt.leastsq(errorfunction, tuple(params), maxfev=options.maxfev, args=(ps, perrs))
     if success in [1,2,3,4]:
@@ -193,29 +193,29 @@ def main():
     if options.usepfds==True:
         data = read_pfds(fns)
     else:
-        print "reading from", fns
+        print("reading from", fns)
         data = read_textfile(fns)
     ps, perrs, mjds = data
     if options.debuglevel > 0:
-        print "Data:"
+        print("Data:")
         for z in zip(*data):
-            print "\tPeriod:", z[0], "Period error:", z[1], "MJD:", z[2]
+            print("\tPeriod:", z[0], "Period error:", z[1], "MJD:", z[2])
     if options.debuglevel > 0:
-        print "initial parameters:"
+        print("initial parameters:")
         print_params(init_params) 
     params = init_params.copy() # copy of init_params
-    print "Fitting %d data points" % len(mjds)
+    print("Fitting %d data points" % len(mjds))
     result = fit(params, data)
     # Display results of fit
-    print "Fit results:"
+    print("Fit results:")
     print_params(result)
-    print "\tMin companion mass: ", min_comp_mass(result[1], result[0])
+    print("\tMin companion mass: ", min_comp_mass(result[1], result[0]))
 
     if len(predict_mjds) > 0:
         periods = kepler_function(*init_params)(predict_mjds)
-        print "\nSpin period predictions:"
+        print("\nSpin period predictions:")
         for mjd, p in zip(predict_mjds,periods):
-            print "\t%r: %r s" % (mjd, p)
+            print("\t%r: %r s" % (mjd, p))
     
     t_actual = np.linspace(mjds.min()-0.5*result[1], mjds.max()+0.5*result[1], mjds.ptp()*1000)
     t = t_actual - int(mjds.min())

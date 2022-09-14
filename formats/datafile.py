@@ -36,10 +36,10 @@ def autogen_dataobj(fns, verbose=False, *args, **kwargs):
     """
     for objname in globals():
         obj = eval(objname)
-        if type(obj)==types.TypeType and issubclass(obj, Data):
+        if type(obj)==type and issubclass(obj, Data):
             if obj.is_correct_filetype(fns):
                 if verbose:
-                    print "Using %s" % objname
+                    print("Using %s" % objname)
                 data = obj(fns, *args, **kwargs)
                 break
     if 'data' not in dir():
@@ -395,7 +395,7 @@ class MergedMockPsrfitsData(PsrfitsData):
 
 def main():
     data = autogen_dataobj(sys.argv[1:])
-    print data.__dict__
+    print(data.__dict__)
 
 
 if __name__=='__main__':

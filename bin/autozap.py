@@ -28,11 +28,11 @@ MAXITER = 10
 def get_ffts(fftfns):
     """Given a list of fftfilenames create PrestoFFT objects.
     """
-    print "Number of .fft files found: %d" % len(fftfns)
+    print("Number of .fft files found: %d" % len(fftfns))
    
     allpffts = [prestofft.PrestoFFT(fn, delayread=True, delayfreqs=True) \
 		for fn in fftfns if not fn.endswith("7.fft")]
-    print "Excluding %d FFTs of beam 7 data..." % (len(fftfns) - len(allpffts))
+    print("Excluding %d FFTs of beam 7 data..." % (len(fftfns) - len(allpffts)))
     
     bad_pffts = 0
     p1 = allpffts[0]
@@ -45,8 +45,8 @@ def get_ffts(fftfns):
 	    pffts.append(pcurr)
 
     if bad_pffts:
-	print "Excluding %d FFTs of different size..." % bad_pffts
-    print "Number of power spectra being considered: %d" % len(pffts)
+	print("Excluding %d FFTs of different size..." % bad_pffts)
+    print("Number of power spectra being considered: %d" % len(pffts))
     return pffts
 
 
@@ -81,7 +81,7 @@ def calc_percentile(pffts, percent=50):
         sys.stdout.write("\rCalculating percentile score (%.1f %%)... %5.1f %%" % \
                             (percent, (100.0*blockend/pwrspec_size)))
         sys.stdout.flush()
-    print "\rCalculating percentile score (%.1f %%)... Done       " % percent
+    print("\rCalculating percentile score (%.1f %%)... Done       " % percent)
     return percentile
 
 
@@ -103,12 +103,12 @@ def plot(freqs, spectrum, style="k-", **plotargs):
     
     fig = plt.gcf()
     if len(fig.get_axes())==5:
-        print "Using existing axes"
+        print("Using existing axes")
         axsubones, axones, axtens, axhundreds, axthousands = fig.get_axes()
     else:
         fig.set_size_inches(10,8.5, forward=True)
         plt.subplots_adjust(hspace=0.3)
-        print "Creating new axes"
+        print("Creating new axes")
         axsubones = plt.subplot(5,1,1) 
         axones = plt.subplot(5,1,2, sharey=axsubones)
         axtens = plt.subplot(5,1,3, sharey=axsubones)
@@ -172,7 +172,7 @@ def gen_mask(freqs, powerspec, nsig=3.5):
     sys.stdout.write("Median filtering... ")
     sys.stdout.flush()
     filtered = scipy.signal.medfilt(powerspec, 101)
-    print "Done"
+    print("Done")
     flattened = (powerspec-filtered)
     halfflat = flattened[flattened<0]
     halfflat.sort()
@@ -181,7 +181,7 @@ def gen_mask(freqs, powerspec, nsig=3.5):
     sys.stdout.flush()
     fitresult = scipy.optimize.leastsq(cdfresids, np.abs(np.array([halfflat[halfflat.size/2]])))
     sigma = fitresult[0]
-    print "Done"
+    print("Done")
     mask = smooth(flattened, SMOOTHFACTOR) > (sigma*nsig)
     return mask
   
@@ -231,7 +231,7 @@ def hone_mask(freqs, powerspec, inmask, nsig):
         outmask[block:blockend] = (smoothed_block > (std_block*nsig))
         sys.stdout.write("\rImproving mask... %5.1f %%" % (100.0*blockend/powerspec.size))
         sys.stdout.flush()
-    print "\rImproving mask... Done       "
+    print("\rImproving mask... Done       ")
     return outmask
 
 
@@ -244,7 +244,7 @@ def smooth(data, smoothfactor=1, verbose=False):
     """
     if smoothfactor > 1:
         if verbose:
-            print "Smoothing by %d bins..." % smoothfactor
+            print("Smoothing by %d bins..." % smoothfactor)
 	kernel = np.ones(smoothfactor, dtype='float32') / \
 		    np.sqrt(smoothfactor)
 	return scipy.signal.convolve(data, kernel, 'same', old_behavior=False)
@@ -294,7 +294,7 @@ def main():
     for ii in range(MAXITER):
         newmask = hone_mask(freqs, powerspec, mask, options.nsig)
         if np.all(newmask==mask):
-            print "Mask is stable."
+            print("Mask is stable.")
             break
         else:
             mask = newmask
