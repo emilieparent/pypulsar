@@ -10,6 +10,7 @@ import numpy as np
 
 from . import calendar
 
+
 def JD_to_GST(JD):
     """Given Julian Day (JD) return Greenwich mean sidereal time
         in hours.
@@ -18,11 +19,11 @@ def JD_to_GST(JD):
             with your Calculator", 3rd Ed.
     """
     JD = np.array(JD)
-    
+
     # Time of day
-    days = (JD-0.5)%1
+    days = (JD-0.5) % 1
     hours = days*24
-    
+
     JD0 = JD-days
     T = (JD0 - np.array(2451545.0))/np.array(36525.0)
     print(T)
@@ -81,9 +82,9 @@ def JD_to_mstUT_deg(JD):
     T = (JD - np.array(2451545.0))/np.array(36525.0)
     print(T)
     mst_deg = np.array(280.46061837) + \
-                np.array(360.98564736629)*(JD - np.array(2451545.0)) + \
-                np.array(0.000387933)*np.power(T,2) - \
-                np.power(T,3)/np.array(38710000.0)
+        np.array(360.98564736629)*(JD - np.array(2451545.0)) + \
+        np.array(0.000387933)*np.power(T, 2) - \
+        np.power(T, 3)/np.array(38710000.0)
     return mst_deg
 
 

@@ -50,7 +50,7 @@ NUM_TO_DAY = {0: 'Sunday',
               1: 'Monday',
               2: 'Tuesday',
               3: 'Wednesday',
-              4: 'Thursday', 
+              4: 'Thursday',
               5: 'Friday',
               6: 'Saturday'}
 
@@ -69,7 +69,7 @@ def MJD_to_JD(MJD):
 
 def date_to_MJD(*args, **kwargs):
     """Convert calendar date to Modified Julian Day (JD).
-        
+
         All arguments are passed directly to "date_to_JD(...)",
         so consult its documentation.
     """
@@ -80,11 +80,11 @@ def MJDnow(gregorian=True):
     """Return the MJD now.
     """
     utc = datetime.datetime.utcnow()
-    dayfrac = utc.day + (utc.hour + \
-                            (utc.minute + \
-                                (utc.second + \
-                                    (utc.microsecond) \
-                            /1.0e6)/60.0)/60.0)/24.0
+    dayfrac = utc.day + (utc.hour +
+                         (utc.minute +
+                          (utc.second +
+                           (utc.microsecond)
+                           / 1.0e6)/60.0)/60.0)/24.0
     return date_to_MJD(utc.year, utc.month, dayfrac, gregorian)
 
 
@@ -97,32 +97,32 @@ def date_to_JD(year, month, day, gregorian=True):
             day: float
             gregorian:  - True for Gregorian calendar (Default)
                         - False for Julian calendar
-    
+
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     if type(month) == bytes:
         month = month_to_num(month)
-    
+
     year = np.copy(np.atleast_1d(year))
     month = np.copy(np.atleast_1d(month))
     day = np.copy(np.atleast_1d(day))
-    
-    year[month<=2] -= 1
-    month[month<=2] += 12
-    
+
+    year[month <= 2] -= 1
+    month[month <= 2] += 12
+
     A = np.floor(year/100.0)
-    
+
     if gregorian:
         B = 2 - A + np.floor(A/4.0)
     else:
         B = 0
 
     JD = np.floor(365.25*(year+4716)) + np.floor(30.6001*(month+1)) + \
-            day + B - 1524.5
+        day + B - 1524.5
 
-    if np.any(JD<0.0):
+    if np.any(JD < 0.0):
         raise ValueError("This function does not apply for JD < 0.")
-    
+
     return JD.squeeze()
 
 
@@ -133,7 +133,7 @@ def julian_to_JD(year, month, day):
             year: integer
             month:  integer or a string
             day: float
-    
+
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     return date_to_JD(year, month, day, gregorian=False)
@@ -146,7 +146,7 @@ def gregorian_to_JD(year, month, day):
             year: integer
             month:  integer or a string
             day: float
-    
+
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     return date_to_JD(year, month, day, gregorian=True)
@@ -159,12 +159,12 @@ def gregorian_to_MJD(year, month, day):
             year: integer
             month:  integer or a string
             day: float
-    
+
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     JD = date_to_JD(year, month, day, gregorian=True)
     return JD_to_MJD(JD)
-    
+
 
 def julian_to_MJD(year, month, day):
     """Convert Julian date to Modified Julian Day (MJD).
@@ -173,7 +173,7 @@ def julian_to_MJD(year, month, day):
             year: integer
             month:  integer or a string
             day: float
-    
+
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     JD = date_to_JD(year, month, day, gregorian=False)
@@ -182,15 +182,15 @@ def julian_to_MJD(year, month, day):
 
 def JD_to_date(JD):
     """Convert Julian Day (JD) to a date.
-        
+
         Input:
             JD: Julian day
 
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
     JD = np.copy(np.atleast_1d(JD))
-    
-    if np.any(JD<0.0):
+
+    if np.any(JD < 0.0):
         raise ValueError("This function does not apply for JD < 0.")
 
     JD += 0.5
@@ -202,7 +202,7 @@ def JD_to_date(JD):
 
     A = np.copy(Z)
     alpha = np.floor((Z-1867216.25)/36524.25)
-    A[Z>=2299161] = Z + 1 + alpha - np.floor(0.25*alpha)
+    A[Z >= 2299161] = Z + 1 + alpha - np.floor(0.25*alpha)
 
     B = A + 1524
     C = np.floor((B-122.1)/365.25)
@@ -211,19 +211,19 @@ def JD_to_date(JD):
 
     day = B - D - np.floor(30.6001*E) + F
     month = E - 1
-    ii = (E==14.0) | (E==15.0)
+    ii = (E == 14.0) | (E == 15.0)
     month[ii] = (E - 13.0)[ii]
     year = C - 4716
-    ii = (month==1.0) | (month==2.0)
+    ii = (month == 1.0) | (month == 2.0)
     year[ii] = (C - 4715)[ii]
 
-    return (year.astype('int').squeeze(), month.astype('int').squeeze(), \
-                day.squeeze())
+    return (year.astype('int').squeeze(), month.astype('int').squeeze(),
+            day.squeeze())
 
 
 def MJD_to_date(MJD):
     """Convert Modified Julian Day (MJD) to a date.
-        
+
         Input:
             MJD: Modified Julian day
 
@@ -235,22 +235,23 @@ def MJD_to_date(MJD):
 
 def is_leap_year(year, gregorian=True):
     """Return True if year is a leap year.
-        
+
         Inputs:
             year: integer
             gregorian:  - True for Gregorian calendar (Default)
                         - False for Julian calendar
     """
     year = np.atleast_1d(year)
-    leap = (year%4)==0
+    leap = (year % 4) == 0
     if gregorian:
-        leap = np.bitwise_and(leap, np.bitwise_or((year%400)==0, (year%100)!=0))
+        leap = np.bitwise_and(leap, np.bitwise_or(
+            (year % 400) == 0, (year % 100) != 0))
     return leap.squeeze()
 
 
 def is_gregorian_leap_year(year):
     """Return True if year is a leap year.
-        
+
         Inputs:
             year: integer
     """
@@ -259,7 +260,7 @@ def is_gregorian_leap_year(year):
 
 def is_julian_leap_year(year):
     """Return True if year is a leap year.
-        
+
         Inputs:
             year: integer
     """
@@ -293,14 +294,14 @@ def first_of_year_MJD(year):
 
 def day_of_year(year, month, day, gregorian=True):
     """Return day of year given month and day.
-        
+
         Inputs:
             year: integer
             month: integer
             day: float
             gregorian:  - True for Gregorian calendar (Default)
                         - False for Julian calendar
-        
+
         Notes:
             'year' and 'gregorian' are used to determine if it is
             a leap year.
@@ -308,9 +309,9 @@ def day_of_year(year, month, day, gregorian=True):
     year = np.atleast_1d(year)
     month = np.atleast_1d(month)
     day = np.atleast_1d(day)
-   
+
     leaps = np.atleast_1d(is_leap_year(year, gregorian))
-   
+
     K = 2*np.ones_like(year)
     K[leaps] = 1
 
@@ -332,8 +333,8 @@ def day_of_week(year, month, day):
     """
     JD = gregorian_to_JD(year, month, np.floor(day)) + 1.5
     return np.mod(JD, 7)
-    
-    
+
+
 def month_to_num(month):
     """Return month number given the month name, a string.
     """
@@ -342,8 +343,8 @@ def month_to_num(month):
     nums = []
     for m in month:
         if type(m) != bytes:
-            raise TypeError("month must be of type string. type(month): %s" % \
-                                type(m))
+            raise TypeError("month must be of type string. type(month): %s" %
+                            type(m))
         if m not in MONTH_TO_NUM:
             raise ValueError("Unrecognized month name: %s" % m)
         nums.append(MONTH_TO_NUM[month])
@@ -360,8 +361,8 @@ def num_to_month(month):
     strings = []
     for m in month:
         if type(m) not in (int, np.int32, np.int64):
-            raise TypeError("month must be of type integer. type(month): %s" % \
-                                type(m))
+            raise TypeError("month must be of type integer. type(month): %s" %
+                            type(m))
         if m not in NUM_TO_MONTH:
             raise ValueError("Unrecognized month number: %d" % m)
         strings.append(NUM_TO_MONTH[m])
@@ -372,7 +373,7 @@ def num_to_month(month):
 
 def date_to_string(year, month, day):
     """Return a string of the date given.
-        
+
         Inputs:
             year: integer
             month: integer
@@ -387,15 +388,15 @@ def date_to_string(year, month, day):
     year = np.atleast_1d(year)
     month = np.atleast_1d(month)
     day = np.atleast_1d(day)
-   
+
     month = num_to_month(month)
     if not hasattr(month, '__iter__'):
         month = [month]
-   
+
     date_strings = []
     for y, m, d in zip(year, month, day):
         date_strings.append("%s %d, %d" % (m, d, y))
-    
+
     if len(date_strings) == 1:
         date_strings = date_strings[0]
     return date_strings
@@ -420,11 +421,11 @@ def interval_in_days(year1, month1, day1, year2, month2, day2, gregorian=True):
 
     diff = JD2 - JD1
     return diff.squeeze()
-   
+
 
 def fraction_of_year(year, month, day, gregorian=True):
     """Compute fraction of year elapsed.
-        
+
         Inputs:
             year: integer
             month: integer
@@ -440,6 +441,7 @@ def fraction_of_year(year, month, day, gregorian=True):
     numdays[leaps] += 1.0
     frac = diff/numdays
     return frac.squeeze()
+
 
 def MJD_to_year(MJD):
     """Given a MJD return the corresponding (fractional) year.
@@ -469,7 +471,7 @@ def year_to_MJD(year):
 
 def MJD_to_datestring(MJD):
     """Given a MJD return the date formatted as a string.
-        
+
         Inputs:
             MJD
     """
@@ -494,11 +496,11 @@ def datetime_to_MJD(dt, gregorian=True):
         dtutc = dt.astimezone(UTC_TZ)
     else:
         dtutc = dt
-    dayfrac = dtutc.day + (dtutc.hour + \
-                            (dtutc.minute + \
-                                (dtutc.second + \
-                                    (dtutc.microsecond) \
-                            /1.0e6)/60.0)/60.0)/24.0
+    dayfrac = dtutc.day + (dtutc.hour +
+                           (dtutc.minute +
+                            (dtutc.second +
+                             (dtutc.microsecond)
+                             / 1.0e6)/60.0)/60.0)/24.0
     return date_to_MJD(dtutc.year, dtutc.month, dayfrac, gregorian)
 
 
@@ -514,5 +516,6 @@ def MJD_to_datetime(mjd):
     yyyy, mm, dd = MJD_to_date(mjd)
     dayfrac = dd % 1
 
-    dt = datetime.datetime(yyyy, mm, int(dd)) + datetime.timedelta(days=dayfrac)
+    dt = datetime.datetime(yyyy, mm, int(dd)) + \
+        datetime.timedelta(days=dayfrac)
     return dt

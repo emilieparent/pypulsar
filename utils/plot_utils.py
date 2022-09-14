@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def hist(xx, bins, tot=None, bottom=None, 
+
+def hist(xx, bins, tot=None, bottom=None,
          *args, **kwargs):
     """
         Inputs:
@@ -12,7 +13,7 @@ def hist(xx, bins, tot=None, bottom=None,
                 (Default: scale by total number of values in xx)
             bottom: The bottom edge of the histogram. 
                 (Useful for stacked histograms)
-    
+
             ***Additional arguments are passed directly to plt.fill
 
         Outputs:
@@ -32,4 +33,3 @@ def hist(xx, bins, tot=None, bottom=None,
     y[1:-1] = counts.repeat(2)
     plt.fill(x, y, *args, **kwargs)
     return counts, edges
-

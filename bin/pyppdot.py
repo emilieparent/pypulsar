@@ -22,20 +22,23 @@ import numpy as np
 import psr_utils
 from pypulsar.utils import colour
 
-MARKER_OPTIONS = {'facecolor':'none', 'zorder':1, 'alpha':0.8, 'lw':4, 's':200} 
-BINARY_MARKER = {'marker':'o', 'edgecolor':'g', 'label':'binary'}
-RRAT_MARKER = {'marker':'s', 'edgecolor':'c', 'label':'rrat'}
-MAGNETAR_MARKER = {'marker':'^', 'facecolor':'#E066FF', 'edgecolor':'#E066FF', 'label':'magnetar'}
-SGR_MARKER = {'marker':'<', 'edgecolor':"#AB82FF", 'label':'sgr'}
-AXP_MARKER = {'marker':'>', 'edgecolor':"#FF7F24", 'label':'axp'}
-SNR_MARKER = {'marker':(4,1,0), 'edgecolor':'y', 'label':'snr'}
+MARKER_OPTIONS = {'facecolor': 'none',
+                  'zorder': 1, 'alpha': 0.8, 'lw': 4, 's': 200}
+BINARY_MARKER = {'marker': 'o', 'edgecolor': 'g', 'label': 'binary'}
+RRAT_MARKER = {'marker': 's', 'edgecolor': 'c', 'label': 'rrat'}
+MAGNETAR_MARKER = {'marker': '^', 'facecolor': '#E066FF',
+                   'edgecolor': '#E066FF', 'label': 'magnetar'}
+SGR_MARKER = {'marker': '<', 'edgecolor': "#AB82FF", 'label': 'sgr'}
+AXP_MARKER = {'marker': '>', 'edgecolor': "#FF7F24", 'label': 'axp'}
+SNR_MARKER = {'marker': (4, 1, 0), 'edgecolor': 'y', 'label': 'snr'}
 
 # Picker determines how far mouse can be from point to select it
 PICKER = 100
 
+
 class Pulsar:
-    def __init__(self, name, p, pdot, raj, decj, dm, \
-                    binarytype, assoc, psrtype, pdot_uplim=False):
+    def __init__(self, name, p, pdot, raj, decj, dm,
+                 binarytype, assoc, psrtype, pdot_uplim=False):
         """Pulsar object.
             Attributes:
                 name - Name
@@ -53,24 +56,26 @@ class Pulsar:
         self.name = name
         self.p = p
         self.pdot = pdot
-        self.pdot_uplim = pdot_uplim 
+        self.pdot_uplim = pdot_uplim
         self.raj = raj
         self.decj = decj
         self.dm = dm
         self.binarytype = binarytype
         self.assoc = assoc
         self.psrtype = psrtype
-        self.rrat = (psrtype is not None and psrtype!='No info' and 'rrat' in psrtype.lower())
-        self.magnetar = (psrtype is not None and psrtype!='No info' and \
-                            ('axp' in psrtype.lower() or 'sgr' in psrtype.lower()))
-        self.sgr = (psrtype is not None and psrtype!='No info' and \
-                    assoc is not None and assoc !='No info' and \
-                            ('axp' in psrtype.lower() and 'sgr' in assoc.lower()))
-        self.axp = (psrtype is not None and psrtype!='No info' and \
-                    assoc is not None and assoc !='No info' and \
-                            ('axp' in psrtype.lower() and 'sgr' not in assoc.lower()))
-        self.snr = (assoc is not None and assoc!='No info' and 'snr' in assoc.lower())
-        self.binary = (binarytype is not None and binarytype!='No info')
+        self.rrat = (psrtype is not None and psrtype !=
+                     'No info' and 'rrat' in psrtype.lower())
+        self.magnetar = (psrtype is not None and psrtype != 'No info' and
+                         ('axp' in psrtype.lower() or 'sgr' in psrtype.lower()))
+        self.sgr = (psrtype is not None and psrtype != 'No info' and
+                    assoc is not None and assoc != 'No info' and
+                    ('axp' in psrtype.lower() and 'sgr' in assoc.lower()))
+        self.axp = (psrtype is not None and psrtype != 'No info' and
+                    assoc is not None and assoc != 'No info' and
+                    ('axp' in psrtype.lower() and 'sgr' not in assoc.lower()))
+        self.snr = (assoc is not None and assoc !=
+                    'No info' and 'snr' in assoc.lower())
+        self.binary = (binarytype is not None and binarytype != 'No info')
 
     def get_computed_params(self):
         """Return pulsar's B-field, age and Edot in a tuple.
@@ -83,31 +88,30 @@ class Pulsar:
             If extended is True then return all available information.
         """
         bfield, age, edot = self.get_computed_params()
-        strings = [colour.cstring("PSR %s" % self.name, \
-                                    fg='default', bg='default', underline=1, bold=1), \
-                 "\tRA (J2000): %s, Dec (J2000): %s" % (self.raj, self.decj)]
+        strings = [colour.cstring("PSR %s" % self.name,
+                                  fg='default', bg='default', underline=1, bold=1),
+                   "\tRA (J2000): %s, Dec (J2000): %s" % (self.raj, self.decj)]
 
         if self.p is not None:
             strings.append("\tPeriod (s): %f" % self.p)
         else:
             strings.append("\tPeriod (s): Not Measured")
-            
+
         if self.pdot is not None:
             strings[-1] += ", P-dot (s/s): %0.3g" % self.pdot
         else:
             strings[-1] += ", P-dot (s/s): Not Measured"
-            
+
         if self.pdot is not None and self.pdot is not None:
-            strings.extend(["\tB-field (G): %0.3g" % bfield, \
-                                    "\tAge (%s): %0.3g" % units_age(age), \
-                                    "\tE-dot (erg/s): %0.3g" % edot])
+            strings.extend(["\tB-field (G): %0.3g" % bfield,
+                            "\tAge (%s): %0.3g" % units_age(age),
+                            "\tE-dot (erg/s): %0.3g" % edot])
         if extended:
-            strings.extend(["\tBinary type: %s" % self.binarytype, \
-                            "\tAssociations: %s" % self.assoc, \
+            strings.extend(["\tBinary type: %s" % self.binarytype,
+                            "\tAssociations: %s" % self.assoc,
                             "\tPulsar type: %s" % self.psrtype])
         return '\n'.join(strings)
 
-    
     def __str__(self):
         return self.get_info(extended=False)
 
@@ -198,9 +202,9 @@ def params_from_ppdot(p, pdot):
     return (bfield, age, edot)
 
 
-def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
-                magnetars=False, snrs=False, axp=False, sgr=False, \
-                edots=[], ages=[], bsurfs=[], size=15):
+def plot_data(pulsars, hightlight=[], binaries=False, rrats=False,
+              magnetars=False, snrs=False, axp=False, sgr=False,
+              edots=[], ages=[], bsurfs=[], size=15):
     """Plot P-Pdot diagram using list of pulsars provided.
         binaries - boolean, initially plot binary markers
         rrats - boolean, initially plot RRAT markers
@@ -211,61 +215,61 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         bsurfs - values for lines of constant surfave b-field
     """
     global scatt_psrs, scatt_psrs_hl
-    periods = np.array([x.p for x in pulsars \
+    periods = np.array([x.p for x in pulsars
                         if x.p is not None and x.pdot is not None])
-    pdots = np.array([x.pdot for x in pulsars \
-                        if x.p is not None and x.pdot is not None])
-    
+    pdots = np.array([x.pdot for x in pulsars
+                      if x.p is not None and x.pdot is not None])
+
     # Points that only have a limit on pdot
-    period_lims = np.array([x.p for x in pulsars \
-                        if x.p is not None and x.pdot is not None and x.pdot_uplim])
-    pdot_lims = np.array([x.pdot for x in pulsars \
-                        if x.p is not None and x.pdot is not None and x.pdot_uplim])
+    period_lims = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None and x.pdot_uplim])
+    pdot_lims = np.array([x.pdot for x in pulsars
+                          if x.p is not None and x.pdot is not None and x.pdot_uplim])
 
     ax = plt.axes()
-    scatt_psrs = ax.scatter(periods, pdots, c='k', s=size, \
+    scatt_psrs = ax.scatter(periods, pdots, c='k', s=size,
                             label='pulsars', picker=PICKER, zorder=0)
     if len(pdot_lims) and len(period_lims):
         yerror = 2.5e-15
-        scatt_psrs_lim = ax.errorbar(period_lims, pdot_lims-yerror, \
-                                yerr=yerror, linewidth=2, mew=2, \
-                                lolims=True, marker=None, c='k', zorder=0)
+        scatt_psrs_lim = ax.errorbar(period_lims, pdot_lims-yerror,
+                                     yerr=yerror, linewidth=2, mew=2,
+                                     lolims=True, marker=None, c='k', zorder=0)
 
     # Pulsars to highlight
     numhl = 0
     if len(highlight):
-        periods_hl = np.array([h.p for h in highlight \
+        periods_hl = np.array([h.p for h in highlight
+                               if h.p is not None and h.pdot is not None])
+        pdots_hl = np.array([h.pdot for h in highlight
                             if h.p is not None and h.pdot is not None])
-        pdots_hl = np.array([h.pdot for h in highlight \
-                            if h.p is not None and h.pdot is not None])
-        periods_hl_lim = np.array([h.p for h in highlight \
-                            if h.p is not None and h.pdot is not None and h.pdot_uplim])
-        pdots_hl_lim = np.array([h.pdot for h in highlight \
-                            if h.p is not None and h.pdot is not None and h.pdot_uplim])
-        scatt_psrs_hl = ax.scatter(periods_hl, pdots_hl, \
-                                    c='r', s=150, label='highlight', picker=PICKER, \
-                                    marker=(5,1,0), edgecolors='r', zorder=1)
+        periods_hl_lim = np.array([h.p for h in highlight
+                                   if h.p is not None and h.pdot is not None and h.pdot_uplim])
+        pdots_hl_lim = np.array([h.pdot for h in highlight
+                                 if h.p is not None and h.pdot is not None and h.pdot_uplim])
+        scatt_psrs_hl = ax.scatter(periods_hl, pdots_hl,
+                                   c='r', s=150, label='highlight', picker=PICKER,
+                                   marker=(5, 1, 0), edgecolors='r', zorder=1)
         if len(pdots_hl_lim) and len(periods_hl_lim):
-            scatt_psrs_hl_lim = ax.errorbar(periods_hl_lim, pdots_hl_lim, yerr=1, \
-                                    uplims=True, marker='.', c='r', zorder=1)
+            scatt_psrs_hl_lim = ax.errorbar(periods_hl_lim, pdots_hl_lim, yerr=1,
+                                            uplims=True, marker='.', c='r', zorder=1)
         numhl = periods_hl.size
 
     # Mark binaries
-    periods_bnry = np.array([x.p for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.binary==True])
-    pdots_bnry = np.array([x.pdot for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.binary==True])
+    periods_bnry = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None
+                             and x.binary == True])
+    pdots_bnry = np.array([x.pdot for x in pulsars
+                           if x.p is not None and x.pdot is not None
+                           and x.binary == True])
     global scatt_binaries
     global scatt_binaries_pnts
     if periods_bnry.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(BINARY_MARKER)
-        scatt_binaries = ax.scatter(periods_bnry, pdots_bnry, \
+        scatt_binaries = ax.scatter(periods_bnry, pdots_bnry,
                                     **scatter_options)
-        scatt_binaries_pnts = ax.scatter(periods_bnry, pdots_bnry, \
-                                    c='k', s=size, zorder=2)
+        scatt_binaries_pnts = ax.scatter(periods_bnry, pdots_bnry,
+                                         c='k', s=size, zorder=2)
         if not binaries:
             # Hide binaries for now
             scatt_binaries.set_visible(False)
@@ -274,21 +278,21 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         scatt_binaries = None
 
     # Mark RRATs
-    periods_rrat = np.array([x.p for x in pulsars+highlight \
-                            if x.p is not None and x.pdot is not None \
-                                and x.rrat==True])
-    pdots_rrat = np.array([x.pdot for x in pulsars+highlight \
-                            if x.p is not None and x.pdot is not None \
-                                and x.rrat==True])
+    periods_rrat = np.array([x.p for x in pulsars+highlight
+                            if x.p is not None and x.pdot is not None
+                             and x.rrat == True])
+    pdots_rrat = np.array([x.pdot for x in pulsars+highlight
+                           if x.p is not None and x.pdot is not None
+                           and x.rrat == True])
     global scatt_rrats
     global scatt_rrats_pnts
     if periods_rrat.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(RRAT_MARKER)
-        scatt_rrats = ax.scatter(periods_rrat, pdots_rrat, \
-                                    **scatter_options)
-        scatt_rrats_pnts = ax.scatter(periods_rrat, pdots_rrat, \
-                                    c='k', s=size, zorder=2)
+        scatt_rrats = ax.scatter(periods_rrat, pdots_rrat,
+                                 **scatter_options)
+        scatt_rrats_pnts = ax.scatter(periods_rrat, pdots_rrat,
+                                      c='k', s=size, zorder=2)
         if not rrats:
             # Hide RRATs for now
             scatt_rrats.set_visible(False)
@@ -297,21 +301,21 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         scatt_rrats = None
 
     # Mark magnetars
-    periods_mag = np.array([x.p for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.magnetar==True])
-    pdots_mag = np.array([x.pdot for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.magnetar==True])
+    periods_mag = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None
+                            and x.magnetar == True])
+    pdots_mag = np.array([x.pdot for x in pulsars
+                          if x.p is not None and x.pdot is not None
+                          and x.magnetar == True])
     global scatt_magnetars
     global scatt_magnetars_pnts
     if periods_mag.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(MAGNETAR_MARKER)
-        scatt_magnetars = ax.scatter(periods_mag, pdots_mag, \
-                                    **scatter_options)
-        scatt_magnetars_pnts = ax.scatter(periods_mag, pdots_mag, \
-                                    c='k', s=size, zorder=2)
+        scatt_magnetars = ax.scatter(periods_mag, pdots_mag,
+                                     **scatter_options)
+        scatt_magnetars_pnts = ax.scatter(periods_mag, pdots_mag,
+                                          c='k', s=size, zorder=2)
         if not magnetars:
             # Hide magnetars for now
             scatt_magnetars.set_visible(False)
@@ -320,18 +324,18 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         scatt_magnetars = None
 
     # Mark sgrs
-    periods_sgr = np.array([x.p for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.sgr==True])
-    pdots_sgr = np.array([x.pdot for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.sgr==True])
+    periods_sgr = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None
+                            and x.sgr == True])
+    pdots_sgr = np.array([x.pdot for x in pulsars
+                          if x.p is not None and x.pdot is not None
+                          and x.sgr == True])
     global scatt_sgr
     if periods_sgr.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(SGR_MARKER)
-        scatt_sgr = ax.scatter(periods_sgr, pdots_sgr, \
-                                    **scatter_options)
+        scatt_sgr = ax.scatter(periods_sgr, pdots_sgr,
+                               **scatter_options)
         if not sgr:
             # Hide sgr for now
             scatt_sgr.set_visible(False)
@@ -339,18 +343,18 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         scatt_sgr = None
 
     # Mark axps
-    periods_axp = np.array([x.p for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.axp==True])
-    pdots_axp = np.array([x.pdot for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.axp==True])
+    periods_axp = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None
+                            and x.axp == True])
+    pdots_axp = np.array([x.pdot for x in pulsars
+                          if x.p is not None and x.pdot is not None
+                          and x.axp == True])
     global scatt_axp
     if periods_axp.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(AXP_MARKER)
-        scatt_axp = ax.scatter(periods_axp, pdots_axp, \
-                                    **scatter_options)
+        scatt_axp = ax.scatter(periods_axp, pdots_axp,
+                               **scatter_options)
         if not axp:
             # Hide axp for now
             scatt_axp.set_visible(False)
@@ -358,21 +362,21 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
         scatt_axp = None
 
     # Mark SNRs
-    periods_snr = np.array([x.p for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.snr==True])
-    pdots_snr = np.array([x.pdot for x in pulsars \
-                            if x.p is not None and x.pdot is not None \
-                                and x.snr==True])
+    periods_snr = np.array([x.p for x in pulsars
+                            if x.p is not None and x.pdot is not None
+                            and x.snr == True])
+    pdots_snr = np.array([x.pdot for x in pulsars
+                          if x.p is not None and x.pdot is not None
+                          and x.snr == True])
     global scatt_snrs
     global scatt_snrs_pnts
     if periods_snr.size:
         scatter_options = MARKER_OPTIONS.copy()
         scatter_options.update(SNR_MARKER)
-        scatt_snrs = ax.scatter(periods_snr, pdots_snr, \
-                                    **scatter_options)
-        scatt_snrs_pnts = ax.scatter(periods_snr, pdots_snr, \
-                                c='k', s=size, zorder=2)
+        scatt_snrs = ax.scatter(periods_snr, pdots_snr,
+                                **scatter_options)
+        scatt_snrs_pnts = ax.scatter(periods_snr, pdots_snr,
+                                     c='k', s=size, zorder=2)
         if not snrs:
             # Hide SNRs for now
             scatt_snrs.set_visible(False)
@@ -393,8 +397,8 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
     plt.rc(('xtick.minor', 'ytick.minor'), size=4)
     draw_lines(bsurfs, edots, ages)
     #loc = matplotlib.ticker.LogLocator()
-    #loc.numticks=6
-    #plt.gca().yaxis.set_major_locator(loc)
+    # loc.numticks=6
+    # plt.gca().yaxis.set_major_locator(loc)
     plt.yticks([1e-21, 1e-18, 1e-15, 1e-12, 1e-9])
     #leg = plt.legend(loc='lower right')
 
@@ -405,6 +409,7 @@ def plot_data(pulsars, hightlight=[], binaries=False, rrats=False, \
     print("\tNumber of magnetars:", periods_mag.size)
     print("\tNumber of binaries:", periods_bnry.size)
     print("\tNumber of SNR associations:", periods_snr.size)
+
 
 def draw_lines(bfields=[], edots=[], ages=[], show_labels=True):
     """Draw multiple lines of constant B-field, edot and age.
@@ -427,18 +432,18 @@ def draw_lines(bfields=[], edots=[], ages=[], show_labels=True):
     for edot in edots:
         plt.plot(plimits, pdot_from_edot(plimits, edot), 'k:', lw=2)
         #label = "%g" % edot
-        #if "e+" in label:
+        # if "e+" in label:
         #    coef, e, pow = label.partition("e+")
         #    if coef != "1":
         #        label = r"$%s \times 10^{%s} erg/s$" % (coef, pow)
         #    else:
         #        label = r"$10^{%s} erg/s$" % pow
-        #else:
+        # else:
         #    label = r"$%s erg/s$" % label
         #plt.text(0.1,0.1, label, transform = plt.gca().transAxes, picker=PICKER)
     plt.xlim(plimits)
     plt.ylim(pdotlimits)
-    
+
 
 def quit():
     print("Quiting...")
@@ -447,7 +452,8 @@ def quit():
 
 def savefigure(savefn='./ppdot.png'):
     print("Saving plot to %s" % savefn)
-    plt.savefig(savefn, orientation='landscape', papertype='letter', facecolor='none')
+    plt.savefig(savefn, orientation='landscape',
+                papertype='letter', facecolor='none')
 
 
 def mousepress(event):
@@ -492,7 +498,7 @@ def keypress(event):
     """Event handler for KeyEvent.
     """
     if type(event.key) == bytes:
-        
+
         if event.key.lower() == 'q':
             # Quit program
             quit()
@@ -607,9 +613,10 @@ def keypress(event):
             print("\tn - Toggle SNR marking")
             print("\t[Left mouse] - Select pulsar (display info in terminal)")
             print("\t             - Select zoom region (if Zoom-mode is on)")
-            print("\t[Middle mouse] - Display P, P-dot, B, E-dot and age at mouse pointer")
+            print(
+                "\t[Middle mouse] - Display P, P-dot, B, E-dot and age at mouse pointer")
             print("-"*80)
-            
+
 
 def create_plot(pulsars, highlight=[], interactive=True, **kwargs):
     """Create the plot and set up event handlers.
@@ -625,22 +632,24 @@ def create_plot(pulsars, highlight=[], interactive=True, **kwargs):
     fig = plt.figure()
     fig.canvas.set_window_title("P-Pdot")
     plot_data(pulsars, highlight, **kwargs)
-    
+
     #all_atnf = parse_pulsar_file("../lib/pulsars/DM150+.txt")
     #plot_data(all_atnf, size=2)
 
     if interactive:
         # Before setting up our own event handlers delete matplotlib's
         # default 'key_press_event' handler.
-        defcids = list(fig.canvas.callbacks.callbacks['key_press_event'].keys())
+        defcids = list(
+            fig.canvas.callbacks.callbacks['key_press_event'].keys())
         for cid in defcids:
             fig.canvas.callbacks.disconnect(cid)
-        
+
         # Register event callbacks function and show the plot
         cid_keypress = fig.canvas.mpl_connect('key_press_event', keypress)
-        cid_mousepress = fig.canvas.mpl_connect('button_press_event', mousepress)
+        cid_mousepress = fig.canvas.mpl_connect(
+            'button_press_event', mousepress)
         cid_pick = fig.canvas.mpl_connect('pick_event', pick)
-        #plt.ion()
+        # plt.ion()
         plt.show()
 
 
@@ -651,12 +660,12 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
     print(indent+"Parsing file (%s)" % psrfn)
     pulsars = []
     nonplottable = 0
-    
+
     # Check if file exists
     if not os.path.exists(psrfn):
         print(indent+"    File not found: %s" % psrfn)
         return pulsars
-    
+
     psrfile = open(psrfn, 'r')
     for line in psrfile.readlines():
         line = line.partition('#')[0].strip()
@@ -668,13 +677,14 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
             # include pulsars from other files.
             for fn in split_line[1:]:
                 print(indent+"    INCLUDE'ing another file.")
-                newindent=indent+'    '
+                newindent = indent+'    '
                 dir = os.path.split(psrfn)[0]
-                pulsars += parse_pulsar_file(os.path.join(dir,fn), indent=newindent)
+                pulsars += parse_pulsar_file(os.path.join(dir,
+                                             fn), indent=newindent)
             continue
         else:
             name = split_line[0]
-        
+
         if split_line[1] == '*':
             p = None
             # No period measured, can't be plotted
@@ -682,7 +692,7 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
             continue
         else:
             p = float(split_line[1])
-            
+
         if split_line[2] == '*':
             pdot = None
             # No pdot measured, can't be plotted
@@ -690,51 +700,50 @@ def parse_pulsar_file(psrfn='pulsars.txt', indent=""):
             continue
         else:
             pdot_str = split_line[2]
-            if pdot_str[0]=='<':
+            if pdot_str[0] == '<':
                 pdot_uplim = True
                 pdot = float(pdot_str[1:])
             else:
                 pdot_uplim = False
                 pdot = float(pdot_str)
 
-            
         if len(split_line) < 4 or split_line[3] == '*':
             raj = None
-        else:    
+        else:
             raj = split_line[3]
-            
+
         if len(split_line) < 5 or split_line[4] == '*':
             decj = None
         else:
             decj = split_line[4]
-            
+
         if len(split_line) < 6 or split_line[5] == '*':
             dm = None
         else:
             dm = float(split_line[5])
-            
+
         if len(split_line) < 7:
             binarytype = "No info"
         elif split_line[6] == '*':
             binarytype = None
         else:
             binarytype = split_line[6]
-            
+
         if len(split_line) < 8:
             assoc = "No info"
         elif split_line[7] == '*':
             assoc = None
         else:
             assoc = split_line[7]
-            
+
         if len(split_line) < 9:
             psrtype = "No info"
         elif split_line[8] == '*':
             psrtype = 'Radio'
         else:
             psrtype = split_line[8]
-        pulsars.append(Pulsar(name, p, pdot, raj, decj, dm, \
-                                binarytype, assoc, psrtype, pdot_uplim=pdot_uplim))
+        pulsars.append(Pulsar(name, p, pdot, raj, decj, dm,
+                              binarytype, assoc, psrtype, pdot_uplim=pdot_uplim))
     print(indent+"    Number of pulsars that cannot be plotted (no P or Pdot): %d" % nonplottable)
     print(indent+"    Done parsing file.")
     return pulsars
@@ -772,61 +781,61 @@ def main():
             del psr_dict[hl.name]
     pulsars = list(psr_dict.values())
     if len(pulsars)+len(highlight):
-        create_plot(pulsars, highlight, binaries=args.binaries, \
-                magnetars=args.magnetars, rrats=args.rrats, \
-                snrs=args.snrs, edots=args.edots, ages=args.ages, \
-                bsurfs=args.bsurfs)
+        create_plot(pulsars, highlight, binaries=args.binaries,
+                    magnetars=args.magnetars, rrats=args.rrats,
+                    snrs=args.snrs, edots=args.edots, ages=args.ages,
+                    bsurfs=args.bsurfs)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', dest='files', type=str, \
+    parser.add_argument('-f', '--file', dest='files', type=str,
                         action='append', help="File containing a list "
                         "of pulsars to display with ATNF catalogue. "
                         "Each pulsar should be on a separate row with "
                         "the following format:\nName period pdot dm "
                         "binary associations pulsar_type."
                         "\nEach column should contain a single string "
-                        "(no space), and '*' should be used as a null value.", \
+                        "(no space), and '*' should be used as a null value.",
                         default=[])
-    parser.add_argument('--highlight', dest='highlight', type=str, \
+    parser.add_argument('--highlight', dest='highlight', type=str,
                         action='append', help="File containing a list "
                         "of pulsars to display with ATNF catalogue. "
                         "These pulsars will be highlighed (displayed "
                         "with a star instead of a point). See -f/--file "
                         "option for formatting.", default=[])
-    parser.add_argument('-e', '--edot', dest='edots', type=float, \
+    parser.add_argument('-e', '--edot', dest='edots', type=float,
                         action='append', help="Value, in erg/s, to plot "
                         "a line of constant E-dot. Multiple -e/--edot options "
                         "can be provided.", default=[])
-    parser.add_argument('-a', '--age', dest='ages', type=float, \
+    parser.add_argument('-a', '--age', dest='ages', type=float,
                         action='append', help="Value, in yr, to plot "
                         "a line of constant age. Multiple -a/--age options "
                         "can be provided.", default=[])
-    parser.add_argument('-b', '--bsurf', dest='bsurfs', type=float, \
+    parser.add_argument('-b', '--bsurf', dest='bsurfs', type=float,
                         action='append', help="Value, in G, to plot "
                         "a line of constant surface B-field. Multiple "
-                        "-b/--bsurf options can be provided.", \
+                        "-b/--bsurf options can be provided.",
                         default=[])
-    parser.add_argument('--def-lines', dest='def_lines', action='store_true', \
+    parser.add_argument('--def-lines', dest='def_lines', action='store_true',
                         help="Plot default lines\n"
                         "E-dot (erg/s): 1e30, 1e33, 1e36\n"
                         "B-field (G): 1e10, 1e12, 1e14\n"
                         "Age (yr): 1e3, 1e6, 1e9")
-    parser.add_argument('--binaries', dest='binaries', action='store_true', \
+    parser.add_argument('--binaries', dest='binaries', action='store_true',
                         help="Mark binary pulsars. This is the initial state, "
                         "binary marking can be toggled interactively. "
                         "(Default: Don't distinguish binaries.)")
-    parser.add_argument('--rrats', dest='rrats', action='store_true', \
+    parser.add_argument('--rrats', dest='rrats', action='store_true',
                         help="Mark RRATs. This is the initial state, RRAT "
                         "marking can be toggled interactively. (Default: "
                         "Don't distinguish RRATs.)")
-    parser.add_argument('--magnetars', dest='magnetars', \
+    parser.add_argument('--magnetars', dest='magnetars',
                         action='store_true', help="Mark magnetars. This "
                         "is the initial state, magnetar marking can be "
                         "toggled interactively. (Default: Don't distinguish "
                         "magnetars.)")
-    parser.add_argument('--snrs', dest='snrs', action='store_true', \
+    parser.add_argument('--snrs', dest='snrs', action='store_true',
                         help="Mark supernova remnant associations. This "
                         "is the initial state, SNR marking can be toggled "
                         "interactively. (Default: Don't distinguish SNR "

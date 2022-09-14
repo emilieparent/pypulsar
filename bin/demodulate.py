@@ -44,10 +44,10 @@ def create_polycos_from_inf(par, inf):
         # optical, X-ray, or gamma-ray data
         center_freq = 0.0
 
-    start_mjd = int(inf.epoch) 
+    start_mjd = int(inf.epoch)
     end_mjd = int(inf.epoch+obslength)+1
 
-    return polycos.create_polycos(par, telescope_id, center_freq, start_mjd, end_mjd) 
+    return polycos.create_polycos(par, telescope_id, center_freq, start_mjd, end_mjd)
 
 
 def create_parfile(inparfn, inf):
@@ -75,7 +75,7 @@ def create_parfile(inparfn, inf):
             if key not in ["F", "F0", "F1", "F2", "F3", "F4", "F5", "F6",
                            "P", "P0", "P1", "P2", "P3", "P4", "P5", "P6",
                            "RAJ", "DECJ", "ELAT", "ELONG", "LAMBDA", "BETA",
-                           "LAMBDA", "BETA", "RA_RAD", "DEC_RAD", "PMRA", 
+                           "LAMBDA", "BETA", "RA_RAD", "DEC_RAD", "PMRA",
                            "PMDEC", "PEPOCH", "POSEPOCH"]:
                 outff.write(" ".join(split[0:2])+'\n')
     outff.close()
@@ -98,7 +98,7 @@ def main():
     # (folding frequency is 1/1000 of sampling time)
     parfn = create_parfile(args.parfile, indat.inf)
     # Create polycos
-    pcos = create_polycos_from_inf(parfn, indat.inf) 
+    pcos = create_polycos_from_inf(parfn, indat.inf)
 
     dphase = 0.0
     imjd = np.floor(indat.inf.epoch)
@@ -137,7 +137,7 @@ def main():
             # Compute the sample number in the pulsar's frame using the polycos
             new_rot = pco.rotation(imjd, fmjd)
             ipsrsamp = (new_rot-rot0)*1000.0  # multiply by 1000 because period
-                                              # is 1000x sample time
+            # is 1000x sample time
             # Calculate difference in sample number in observation
             # and pulsar frames
             dsamp = (idatsamp+dphase)-ipsrsamp

@@ -34,7 +34,7 @@ class wapp:
             self.already_read_ascii_header = False
             self.already_parsed_ascii_header = False
             self.ascii_header = ""
-            self.ascii_header_size = None # in bytes
+            self.ascii_header_size = None  # in bytes
             self.header_params = []
             self.header_types = {}
             self.header = {}
@@ -43,11 +43,11 @@ class wapp:
             self.header_size = None
             self.data_size = None
             self.number_of_samples = None
-            self.obs_time = None # Duration of data in file (in seconds)
+            self.obs_time = None  # Duration of data in file (in seconds)
             self.bytes_per_lag = None
             self.wappfile = open(self.filename, 'rb')
             self.read_header()
-    
+
     def close(self):
         self.wappfile.close()
 
@@ -60,13 +60,14 @@ class wapp:
         self.read_ascii_header()
         # Parse ASCII header to get WAPP_HEADER struct definition
         self.parse_ascii_header()
-        # Now that we have parameter names and types, unpack 
+        # Now that we have parameter names and types, unpack
         # binary data
         for name, charcode in zip(self.header_params, self.header_types):
-            binarydata = struct.unpack(charcode, \
-                            self.wappfile.read(struct.calcsize(charcode)))
+            binarydata = struct.unpack(charcode,
+                                       self.wappfile.read(struct.calcsize(charcode)))
             if charcode[-1] == 'c':
-                chars = [c for c in binarydata if ord(c)] # Non-Null characters
+                # Non-Null characters
+                chars = [c for c in binarydata if ord(c)]
                 if chars:
                     self.header[name] = ''.join(chars)
             elif int(charcode[:-1]) == 1:
@@ -79,19 +80,18 @@ class wapp:
         self.header_size = self.wappfile.tell()
         self.binary_header_size = self.header_size - self.ascii_header_size
         self.data_size = self.file_size - self.header_size
-        if self.header['lagformat']==0:
+        if self.header['lagformat'] == 0:
             # 16 bit lags, so 2 bytes per sample
             self.bytes_per_lag = 2.0
-        elif self.heder['lagformat']==1:
+        elif self.heder['lagformat'] == 1:
             # 32 bit lags, so 4 bytes per sample
             self.bytes_per_lag = 4.0
         else:
-            raise ValueError("Unexpected lagformat (%d)." % self.header['lagformat'])
+            raise ValueError("Unexpected lagformat (%d)." %
+                             self.header['lagformat'])
         self.number_of_samples = self.data_size/self.bytes_per_lag / \
-                                    self.header['num_lags']
+            self.header['num_lags']
         self.obs_time = self.header['samp_time']*1e-6*self.number_of_samples
-        
-
 
     def read_ascii_header(self):
         """Peel off ASCII header from WAPP file and
@@ -100,10 +100,10 @@ class wapp:
         if self.already_read_ascii_header:
             return
         self.seek_to_ascii_header_start()
-        char = self.wappfile.read(1) # read first character
+        char = self.wappfile.read(1)  # read first character
         while char != '\0':
             self.ascii_header += char
-            char = self.wappfile.read(1) # read next character
+            char = self.wappfile.read(1)  # read next character
         self.ascii_header_size = self.wappfile.tell()
         self.already_read_ascii_header = True
 
@@ -123,8 +123,8 @@ class wapp:
             return
         if use_cpp:
             # Pass ascii header through cpp
-            cpp_pipe = subprocess.Popen("cpp", stdin=subprocess.PIPE, \
-                            stdout=subprocess.PIPE, universal_newlines=True)
+            cpp_pipe = subprocess.Popen("cpp", stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE, universal_newlines=True)
             pipeout, pipeerr = cpp_pipe.communicate(self.ascii_header)
             cpp_pipe.stdin.close()
             hdrtext = pipeout
@@ -142,8 +142,8 @@ class wapp:
 
         # Types of parameters need to be converted to struct modules
         # formatting codes
-        self.header_types = [decl_to_charcode(decl) \
-                                for decl in wapp_struct.decls]
+        self.header_types = [decl_to_charcode(decl)
+                             for decl in wapp_struct.decls]
         self.already_parsed_ascii_header = True
 
     def find_wapp_struct_node(self, node):
@@ -153,7 +153,7 @@ class wapp:
             children.
         """
         if isinstance(node, pycparser.c_ast.Struct) and \
-            node.name == 'WAPP_HEADER':
+                node.name == 'WAPP_HEADER':
             return node
         for child in node.children():
             result = self.find_wapp_struct_node(child)

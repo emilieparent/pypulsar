@@ -31,7 +31,7 @@ def filter(data):
     """Perform Zero-DM Filter on data.
         Subtract mean of each time sample from itself.
     """
-    
+
     data_avg = data.mean()
     if data_avg.dtype != data.dtype:
         # Round and cast data_avg to retain data's dtype
@@ -71,33 +71,32 @@ def main():
     write_data(infbfile, outfbfile)
     sys.stdout.write("\rDone!" + " "*50 + "\n")
     sys.stdout.flush()
-    
+
     # Close files
     outfbfile.close()
     infbfile.close()
 
 
-if __name__=='__main__':
-    parser = optparse.OptionParser(usage='%prog [options] infile', \
-                description="Perfom Zero-DM Filter on filterbank file.")
-    parser.add_option('-o', '--outname', dest='outname', type='string', \
-                help="Output filename.", default=None)
-    parser.add_option('-d', '--debug', dest='debug', action='store_true', \
-                help="Print useful debugging information. " \
-                     "(Default: Don't print debug info.)", default=False)
+if __name__ == '__main__':
+    parser = optparse.OptionParser(usage='%prog [options] infile',
+                                   description="Perfom Zero-DM Filter on filterbank file.")
+    parser.add_option('-o', '--outname', dest='outname', type='string',
+                      help="Output filename.", default=None)
+    parser.add_option('-d', '--debug', dest='debug', action='store_true',
+                      help="Print useful debugging information. "
+                      "(Default: Don't print debug info.)", default=False)
     (options, args) = parser.parse_args()
 
-    if len(args)==0:
+    if len(args) == 0:
         parser.print_help()
         sys.exit(1)
-    elif len(args)!=1:
+    elif len(args) != 1:
         sys.stderr.write("Only one input file must be provided!\n")
     else:
         options.infile = args[-1]
 
     if options.outname is None:
-        sys.stderr.write("An outname must be provided. " \
-                            "(Use -o/--outname on command line).\n")
+        sys.stderr.write("An outname must be provided. "
+                         "(Use -o/--outname on command line).\n")
         sys.exit(1)
     main()
-    

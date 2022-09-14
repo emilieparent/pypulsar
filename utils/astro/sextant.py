@@ -12,6 +12,7 @@ import numpy as np
 from . import protractor
 from . import calendar
 
+
 def ha_from_lst(lst, ra):
     """Given local sidereal time (lst) and right ascension (ra),
         both in same units, (degrees, radians, or decimal hours)
@@ -31,25 +32,25 @@ def ha_from_mjdlon(mjd, lon, ra):
 
         Return value is in hours.
     """
-    LST = clock.MJD_lon_to_LST(mjd, lon) # Result is in hours
+    LST = clock.MJD_lon_to_LST(mjd, lon)  # Result is in hours
     hourangle = LST - ra
     return hourangle
 
 
-def equatorial_to_ecliptic(ra, decl, input="sexigesimal", output="deg", \
-                                J2000=True):
+def equatorial_to_ecliptic(ra, decl, input="sexigesimal", output="deg",
+                           J2000=True):
     """Given right ascension and declination (provided in units of 'input')
         return ecliptic coordinates (longitude, latitude) in units of 'output'.
 
         If J2000 is true, assume input coords are in J2000 equinox,
             otherwise assume input coords are in B1950 equinox.
-    
+
         Possible values for input and output are "sexigesimal", "deg" and "rad".
     """
     if J2000:
-        obliquity = 0.409092804 # radians
+        obliquity = 0.409092804  # radians
     else:
-        obliquity = 0.409206212 # radians
+        obliquity = 0.409206212  # radians
 
     # Convert equatorial coords to radians
     if input == "sexigesimal":
@@ -60,16 +61,16 @@ def equatorial_to_ecliptic(ra, decl, input="sexigesimal", output="deg", \
         decl = protractor.convert(decl, input, "rad")
 
     # Do the conversion
-    lon = np.arctan2(np.sin(ra)*np.cos(obliquity) + \
-                        np.tan(decl)*np.sin(obliquity),
-                        np.cos(ra))
-    lat = np.arcsin(np.sin(decl)*np.cos(obliquity) - \
-                        np.cos(decl)*np.sin(obliquity)*np.sin(ra))
-    
+    lon = np.arctan2(np.sin(ra)*np.cos(obliquity) +
+                     np.tan(decl)*np.sin(obliquity),
+                     np.cos(ra))
+    lat = np.arcsin(np.sin(decl)*np.cos(obliquity) -
+                    np.cos(decl)*np.sin(obliquity)*np.sin(ra))
+
     # Ensure radian values are between 0 and 2pi
     lon = np.mod(lon, np.pi*2)
     lat = np.mod(lat, np.pi*2)
-    
+
     if output == "sexigesimal":
         output = "dmsstr"
     lon = protractor.convert(lon, "rad", output)
@@ -78,21 +79,21 @@ def equatorial_to_ecliptic(ra, decl, input="sexigesimal", output="deg", \
     return (lon, lat)
 
 
-def ecliptic_to_equatorial(lon, lat, input="deg", output="sexigesimal", \
-                                J2000=True):
+def ecliptic_to_equatorial(lon, lat, input="deg", output="sexigesimal",
+                           J2000=True):
     """Given ecliptic longitude and latitude (provided in units of 'input')
         return equatorial coordinates (right ascension, declination)
         in units of 'output'.
 
         If J2000 is true, assume input coords are in J2000 equinox,
             otherwise assume input coords are in B1950 equinox.
-    
+
         Possible values for input and output are "sexigesimal", "deg" and "rad".
     """
     if J2000:
-        obliquity = 0.409092804 # radians
+        obliquity = 0.409092804  # radians
     else:
-        obliquity = 0.409206212 # radians
+        obliquity = 0.409206212  # radians
 
     # Convert ecliptic coords to radians
     if input == "sexigesimal":
@@ -101,16 +102,16 @@ def ecliptic_to_equatorial(lon, lat, input="deg", output="sexigesimal", \
     lat = protractor.convert(lat, input, "rad")
 
     # Do the conversion
-    ra = np.arctan2(np.sin(lon)*np.cos(obliquity) - \
-                    np.tan(lat)*np.sin(obliquity), \
+    ra = np.arctan2(np.sin(lon)*np.cos(obliquity) -
+                    np.tan(lat)*np.sin(obliquity),
                     np.cos(lon))
-    decl = np.arcsin(np.sin(lat)*np.cos(obliquity) + \
-                    np.cos(lat)*np.sin(obliquity)*np.sin(lon))
-   
+    decl = np.arcsin(np.sin(lat)*np.cos(obliquity) +
+                     np.cos(lat)*np.sin(obliquity)*np.sin(lon))
+
     # Ensure radian values are between 0 and 2pi
     ra = np.mod(ra, np.pi*2)
     decl = np.mod(decl, np.pi*2)
-    
+
     if output == "sexigesimal":
         ra = protractor.convert(ra, "rad", "hmsstr")
         decl = protractor.convert(decl, "rad", "dmsstr")
@@ -125,7 +126,7 @@ def hadec_to_altaz(ha, decl, obslat, input="sexigesimal", output="deg"):
     """Given hour angle, declination (provided in units of 'input') 
         and observer latitude (in degrees) return local horizontal coordinates
         (altitude and azimuth, in units of 'output').
-    
+
         Possible values for input and output are "sexigesimal", "deg" and "rad".
     """
     # Convert equatorial coords to radians
@@ -137,10 +138,10 @@ def hadec_to_altaz(ha, decl, obslat, input="sexigesimal", output="deg"):
         decl = protractor.convert(decl, input, "rad")
 
     # Do the conversion
-    alt = np.arcsin(np.sin(obslat)*np.sin(decl) + \
-                        np.cos(obslat)*np.cos(decl)*np.cos(ha))
-    az = np.arccos((np.sin(decl) - np.sin(obslat)*np.sin(alt))/ \
-                        (np.cos(obslat)*np.cos(alt)))
+    alt = np.arcsin(np.sin(obslat)*np.sin(decl) +
+                    np.cos(obslat)*np.cos(decl)*np.cos(ha))
+    az = np.arccos((np.sin(decl) - np.sin(obslat)*np.sin(alt)) /
+                   (np.cos(obslat)*np.cos(alt)))
 
     # Ensure radian values are between 0 and 2pi
     az = np.mod(az, np.pi*2)
@@ -167,12 +168,12 @@ def altaz_to_hadec(alt, az, obslat, input="deg", output="sexigesimal"):
         input = "dmsstr"
     alt = protractor.convert(alt, input, "rad")
     az = protractor.convert(az, input, "rad")
-    
+
     # Do the conversion
-    ha = np.arctan2(np.sin(az), np.cos(az)*np.sin(obslat) + \
+    ha = np.arctan2(np.sin(az), np.cos(az)*np.sin(obslat) +
                     np.tan(alt)*np.cos(obslat))
-    decl = np.arcsin(np.sin(obslat)*np.sin(alt) - \
-                    np.cos(obslat)*np.cos(alt)*np.cos(az))
+    decl = np.arcsin(np.sin(obslat)*np.sin(alt) -
+                     np.cos(obslat)*np.cos(alt)*np.cos(az))
 
     # Ensure radian values are between 0 and 2pi
     ha = np.mod(ha, np.pi*2)
@@ -189,8 +190,8 @@ def altaz_to_hadec(alt, az, obslat, input="deg", output="sexigesimal"):
     return (ha, decl)
 
 
-def equatorial_to_galactic(ra, decl, input="sexigesimal", output="deg", \
-                            J2000=True):
+def equatorial_to_galactic(ra, decl, input="sexigesimal", output="deg",
+                           J2000=True):
     """Given right ascension and declination (in units of 'input') convert
         to galactic longitude and latitude (returned in units of 'output').
 
@@ -211,15 +212,15 @@ def equatorial_to_galactic(ra, decl, input="sexigesimal", output="deg", \
         ra, decl = precess_J2000_to_B1950(ra, decl, input='rad', output='rad')
 
     # Define galactic north pole
-    ra_north = 3.35539549 # radians
-    decl_north = 0.478220215 # radians
-    
+    ra_north = 3.35539549  # radians
+    decl_north = 0.478220215  # radians
+
     # Do the conversion
-    x = np.arctan2(np.sin(ra_north-ra), np.cos(ra_north-ra)*np.sin(decl_north) - \
-                    np.tan(decl)*np.cos(decl_north))
-    l = 5.28834763 - x # 303 deg = 5.28834763 rad (origin of galactic coords)
-    b = np.arcsin(np.sin(decl)*np.sin(decl_north) + \
-                    np.cos(decl)*np.cos(decl_north)*np.cos(ra_north-ra))
+    x = np.arctan2(np.sin(ra_north-ra), np.cos(ra_north-ra)*np.sin(decl_north) -
+                   np.tan(decl)*np.cos(decl_north))
+    l = 5.28834763 - x  # 303 deg = 5.28834763 rad (origin of galactic coords)
+    b = np.arcsin(np.sin(decl)*np.sin(decl_north) +
+                  np.cos(decl)*np.cos(decl_north)*np.cos(ra_north-ra))
 
     # Ensure radian values are between 0 and 2pi
     l = np.atleast_1d(np.mod(l, np.pi*2))
@@ -261,15 +262,15 @@ def precess_B1950_to_J2000(ra, decl, input="sexigesimal", output="sexigesimal"):
     x2 = 0.9999257080*x - 0.0111789372*y - 0.0048590035*z
     y2 = 0.0111789372*x + 0.9999375134*y - 0.0000271626*z
     z2 = 0.0048590036*x - 0.0000271579*y + 0.9999881946*z
-   
+
     # Convert to equatorial
-    ra2000 = np.arctan2(y2,x2)
+    ra2000 = np.arctan2(y2, x2)
     decl2000 = np.arcsin(z2)
 
     # Ensure radian values are between 0 and 2pi
     ra2000 = np.mod(ra2000, np.pi*2)
     decl2000 = np.mod(decl2000, np.pi*2)
-   
+
     # Convert to desired units
     if output == "sexigesimal":
         ra2000 = protractor.convert(ra2000, "rad", "hmsstr")
@@ -301,18 +302,18 @@ def precess_J2000_to_B1950(ra, decl, input="sexigesimal", output="sexigesimal"):
     z = np.sin(decl)
 
     # Rotate vector
-    x2 =  0.9999257080*x + 0.0111789372*y + 0.0048590036*z
+    x2 = 0.9999257080*x + 0.0111789372*y + 0.0048590036*z
     y2 = -0.0111789372*x + 0.9999375134*y - 0.0000271579*z
     z2 = -0.0048590035*x - 0.0000271626*y + 0.9999881946*z
-   
+
     # Convert to equatorial
-    ra1950 = np.arctan2(y2,x2)
+    ra1950 = np.arctan2(y2, x2)
     decl1950 = np.arcsin(z2)
 
     # Ensure radian values are between 0 and 2pi
     ra1950 = np.mod(ra1950, np.pi*2)
     decl1950 = np.mod(decl1950, np.pi*2)
-   
+
     # Convert to desired units
     if output == "sexigesimal":
         ra1950 = protractor.convert(ra1950, "rad", "hmsstr")
@@ -324,8 +325,8 @@ def precess_J2000_to_B1950(ra, decl, input="sexigesimal", output="sexigesimal"):
     return (ra1950, decl1950)
 
 
-def precess(ra, decl, inequinox, outequinox, \
-                input="sexigesimal", output="sexigesimal"):
+def precess(ra, decl, inequinox, outequinox,
+            input="sexigesimal", output="sexigesimal"):
     """Given right ascension and declination (in units of 'input') in 'inequinox'
         equinox, precess to 'outequinox' equinox (returned in units of 'output').
 
@@ -376,7 +377,7 @@ def precess(ra, decl, inequinox, outequinox, \
     # Ensure radian values are between 0 and 2pi
     outra = np.mod(outra, np.pi*2)
     outdecl = np.mod(outdecl, np.pi*2)
-   
+
     # Convert to desired units
     if output == "sexigesimal":
         outra = protractor.convert(outra, "rad", "hmsstr")
@@ -387,16 +388,17 @@ def precess(ra, decl, inequinox, outequinox, \
 
     return (outra, outdecl)
 
+
 def angsep(ra1, dec1, ra2, dec2, input="sexigesimal", output="deg"):
     """
     return angular separation in units of 'output'.
     ra1, dec1, ra2, dec2 are all given in unites of 'input'.
     If 'input' is not a string, it is assumed to be a 2-tuple, defining
     the input format for ra1/dec1, and ra2/dec2 respectively.
-    
+
     Possible values for input and output are "sexigesimal", "deg" and "rad".
     """
-    if type(input)==bytes:
+    if type(input) == bytes:
         # input type is same for both sets of coords
         input1 = input
         input2 = input
@@ -404,20 +406,20 @@ def angsep(ra1, dec1, ra2, dec2, input="sexigesimal", output="deg"):
         # Assume input argument is a tuple contaning 2 strings
         input1 = input[0]
         input2 = input[1]
-    if input1=="sexigesimal":
+    if input1 == "sexigesimal":
         ra1_rad = protractor.convert(ra1, "hmsstr", "rad")
         dec1_rad = protractor.convert(dec1, "dmsstr", "rad")
     else:
         ra1_rad = protractor.convert(ra1, input1, "rad")
         dec1_rad = protractor.convert(dec1, input1, "rad")
-    if input2=="sexigesimal":
+    if input2 == "sexigesimal":
         ra2_rad = protractor.convert(ra2, "hmsstr", "rad")
         dec2_rad = protractor.convert(dec2, "dmsstr", "rad")
     else:
         ra2_rad = protractor.convert(ra2, input2, "rad")
         dec2_rad = protractor.convert(dec2, input2, "rad")
 
-    angsep_rad = np.arccos(np.sin(dec1_rad)*np.sin(dec2_rad)+\
-                    np.cos(dec1_rad)*np.cos(dec2_rad)*np.cos(ra1_rad-ra2_rad))
+    angsep_rad = np.arccos(np.sin(dec1_rad)*np.sin(dec2_rad) +
+                           np.cos(dec1_rad)*np.cos(dec2_rad)*np.cos(ra1_rad-ra2_rad))
     angsep = protractor.convert(angsep_rad, "rad", output)
     return angsep

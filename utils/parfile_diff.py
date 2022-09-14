@@ -29,26 +29,26 @@ def main():
     rots = np.empty((len(mjds), len(parfns)))
 
     for ii, mjd in utils.show_progress(enumerate(mjds), width=50, tot=len(mjds)):
-        pcos_ref = polycos.create_polycos(parfn_ref, TEL_ID, FCTR, 
-                                     np.floor(mjd-1), np.ceil(mjd+1), \
-                                     MAX_HA)
+        pcos_ref = polycos.create_polycos(parfn_ref, TEL_ID, FCTR,
+                                          np.floor(mjd-1), np.ceil(mjd+1),
+                                          MAX_HA)
         rot = pcos_ref.get_rotation(int(mjd), mjd % 1)
         freq = pcos_ref.get_freq(int(mjd), mjd % 1)
-        rots_ref[ii] = np.floor(rot) # Integer rotation number
+        rots_ref[ii] = np.floor(rot)  # Integer rotation number
         # Shift MJD to correspond to integer rotation
         mjd -= (rot % 1)/freq/psr_utils.SECPERDAY
         mjds[ii] = mjd
 
         for jj, parfn in enumerate(parfns):
-            pcos = polycos.create_polycos(parfn, TEL_ID, FCTR, 
-                                     np.floor(mjd-1), np.ceil(mjd+1), \
-                                     MAX_HA)
-            rots[ii,jj] = pcos.get_rotation(int(mjd), mjd % 1)
+            pcos = polycos.create_polycos(parfn, TEL_ID, FCTR,
+                                          np.floor(mjd-1), np.ceil(mjd+1),
+                                          MAX_HA)
+            rots[ii, jj] = pcos.get_rotation(int(mjd), mjd % 1)
     fig = plt.figure()
     plt.axhline(0, ls='--', c='k', label=os.path.basename(parfn_ref))
     for jj, parfn in enumerate(parfns):
         c = COLOURS[jj % len(parfns)]
-        plt.plot(mjds, rots[:,jj]-rots_ref, c=c, ls='-', lw=2,
+        plt.plot(mjds, rots[:, jj]-rots_ref, c=c, ls='-', lw=2,
                  label=os.path.basename(parfn))
     plt.xlabel("Time (MJD)")
     plt.ylabel("Residuals (revolutions)")

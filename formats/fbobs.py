@@ -13,8 +13,10 @@ Patrick Lazarus, May 9th, 2010
 import numpy as np
 from . import filterbank
 
+
 class fbobs:
     """A filterbank observation class."""
+
     def __init__(self, filfns):
         fbs = [filterbank.filterbank(fn) for fn in filfns]
         startmjds = np.array([fb.header['tstart'] for fb in fbs])
@@ -25,12 +27,13 @@ class fbobs:
         self.numfiles = len(self.fbs)
         self.startmjds = startmjds[sortinds]
         self.nsamps = np.array([fb.number_of_samples for fb in self.fbs])
-        self.tsamp = fbs[0].header['tsamp'] # Assume sample time is uniform over observation
-        self.lengths = self.nsamps*self.tsamp # length of each file in seconds
+        # Assume sample time is uniform over observation
+        self.tsamp = fbs[0].header['tsamp']
+        self.lengths = self.nsamps*self.tsamp  # length of each file in seconds
 
         self.endsamps = np.cumsum(self.nsamps)
         self.endtimes = self.endsamps*self.tsamp
-        self.startsamps = np.concatenate(([0],self.endsamps[:-1]))
+        self.startsamps = np.concatenate(([0], self.endsamps[:-1]))
         self.starttimes = self.startsamps*self.tsamp
 
         self.obslen = self.endtimes[-1]
@@ -68,7 +71,7 @@ class fbobs:
         if startsamp <= 0:
             startsamp = 0
         if endsamp >= self.endsamps[-1]:
-            endsamp = self.endsamps[-1] 
+            endsamp = self.endsamps[-1]
         # Find files at start and end of interval
         for ii, (start, end) in enumerate(zip(self.startsamps, self.endsamps)):
             if start <= startsamp <= end:
@@ -90,8 +93,8 @@ class fbobs:
             numsamps = self.endsamps[startfile] - startsamp
             self.fbs[startfile].seek_to_sample(firstsamp)
             chunks.append(self.fbs[startfile].read_Nsamples(numsamps))
-            
-            for ii in range(startfile+1,endfile):
+
+            for ii in range(startfile+1, endfile):
                 chunks.append(self.fbs[ii].read_all_samples())
 
             numsamps = endsamp - self.startsamps[endfile]

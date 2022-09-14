@@ -13,13 +13,15 @@ from scipy import special
 
 from pypulsar.utils import skytemp
 
-TCMB = 2.73 # K
+TCMB = 2.73  # K
 verbose = True
+
 
 class SnrEstimator:
     """
     Signal-to-noise estimator object.
     """
+
     def __init__(self, freq, bw, numpol, gain, systemp, fwhm):
         """SnrEstimator object creator.
 
@@ -37,26 +39,26 @@ class SnrEstimator:
         self.freq = freq
         self.bw = bw
         self.numpol = numpol
-        
+
         if type(gain) is types.FunctionType:
             self.gain = gain
         else:
             self.gain = lambda za=0, az=0: gain
-        
+
         if type(systemp) is types.FunctionType:
             self.systemp = systemp
         else:
             self.systemp = lambda za=0, az=0: systemp
-        
+
         if type(fwhm) is types.FunctionType:
             self.fwhm = fwhm
         else:
             self.fwhm = lambda za=0, az=0: fwhm
-      
+
         self.beam_profile = airy_pattern
-      
-    def estimate_snr(self, za, az, Smean, Sfreq, time, angsep, period, \
-                        w50=None, Serror=None, l=None, b=None, spindx=-1.8):
+
+    def estimate_snr(self, za, az, Smean, Sfreq, time, angsep, period,
+                     w50=None, Serror=None, l=None, b=None, spindx=-1.8):
         """Estimate signal-to-noise of a known pulsar.
         Returns signal-to-noise and error on signal-to-noise.
 
@@ -80,11 +82,11 @@ class SnrEstimator:
             Serror = 0
 
         if self.freq != Sfreq:
-            Smean, Serror = change_freq(Smean, error=Serror, \
-                                            oldfreq=Sfreq, newfreq=self.freq, \
-                                            index=spindx)
+            Smean, Serror = change_freq(Smean, error=Serror,
+                                        oldfreq=Sfreq, newfreq=self.freq,
+                                        index=spindx)
             Sfreq = self.freq
-        
+
         if l is not None and b is not None:
             Tsky = skytemp.get_skytemp(l, b, freq=self.freq)
         else:
@@ -99,10 +101,10 @@ class SnrEstimator:
 
         Smean = np.atleast_1d(Smean)
         Serror = np.atleast_1d(Serror)
-        
+
         snr = Smean*k
         snrerror = Serror*k
-        snrerror[Serror is None or Serror==0] = np.nan
+        snrerror[Serror is None or Serror == 0] = np.nan
         return snr, snrerror
 
 
@@ -117,7 +119,7 @@ def airy_pattern(fwhm, x):
     # half-max of Airy pattern's central peak occurs at 1.61633
     scaled_x = x/fwhm*(2.0*1.61633)
     airy = np.atleast_1d((2*special.j1(scaled_x)/scaled_x)**2)
-    airy[x==0] = 1
+    airy[x == 0] = 1
     return airy
 
 

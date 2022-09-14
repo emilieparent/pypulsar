@@ -4,13 +4,15 @@ import numpy as np
 import scipy.signal
 import psr_utils
 
+
 class Spectra(object):
     """A class to store spectra. This is mainly to provide
         reusable functionality.
     """
+
     def __init__(self, freqs, dt, data, starttime=0, dm=0):
         """Spectra constructor.
-            
+
             Inputs:
                 freqs: Observing frequencies for each channel.
                 dt: Sample time (in seconds).
@@ -26,7 +28,7 @@ class Spectra(object):
                 spectra_obj: Spectrum object.
         """
         self.numchans, self.numspectra = data.shape
-        assert len(freqs)==self.numchans
+        assert len(freqs) == self.numchans
 
         self.freqs = freqs
         self.data = data.astype('float')
@@ -39,15 +41,15 @@ class Spectra(object):
 
     def __getitem__(self, key):
         return self.data[key]
-    
+
     def __setitem__(self, key, value):
         self.data[key] = value
-    
+
     def get_chan(self, channum):
-        return self.data[channum,:]
+        return self.data[channum, :]
 
     def get_spectrum(self, specnum):
-        return self.data[:,specnum]
+        return self.data[:, specnum]
 
     def shift_channels(self, bins, padval=0):
         """Shift each channel to the left by the corresponding 
@@ -59,7 +61,7 @@ class Spectra(object):
                 padval: Value to use when shifting near the edge
                     of a channel. This can be a numeric value,
                     'median', 'mean', or 'rotate'. 
-                    
+
                     The values 'median' and 'mean' refer to the 
                     median and mean of the channel. The value 
                     'rotate' takes values from one end of the 
@@ -76,19 +78,19 @@ class Spectra(object):
             # Use 'chan[:]' so update happens in-place
             # this way the change effects self.data
             chan[:] = psr_utils.rotate(chan, bins[ii])
-            if padval!='rotate':
+            if padval != 'rotate':
                 # Get padding value
-                if padval=='mean':
+                if padval == 'mean':
                     pad = np.mean(chan)
-                elif padval=='median':
+                elif padval == 'median':
                     pad = np.median(chan)
                 else:
                     pad = padval
-                
+
                 # Replace rotated values with padval
-                if bins[ii]>0:
+                if bins[ii] > 0:
                     chan[-bins[ii]:] = pad
-                elif bins[ii]<0:
+                elif bins[ii] < 0:
                     chan[:-bins[ii]] = pad
 
     def subband(self, nsub, subdm=None, padval=0):
@@ -118,19 +120,20 @@ class Spectra(object):
         sub_hifreqs = self.freqs[np.arange(nsub)*nchan_per_sub]
         sub_lofreqs = self.freqs[(1+np.arange(nsub))*nchan_per_sub-1]
         sub_ctrfreqs = 0.5*(sub_hifreqs+sub_lofreqs)
-        
+
         if subdm is not None:
             # Compute delays
             ref_delays = psr_utils.delay_from_DM(subdm-self.dm, sub_hifreqs)
             delays = psr_utils.delay_from_DM(subdm-self.dm, self.freqs)
-            rel_delays = delays-ref_delays.repeat(nchan_per_sub) # Relative delay
+            rel_delays = delays - \
+                ref_delays.repeat(nchan_per_sub)  # Relative delay
             rel_bindelays = np.round(rel_delays/self.dt).astype('int')
             # Shift channels
             self.shift_channels(rel_bindelays, padval)
 
         # Subband
-        self.data = np.array([np.sum(sub, axis=0) for sub in \
-                                np.vsplit(self.data, nsub)])
+        self.data = np.array([np.sum(sub, axis=0) for sub in
+                              np.vsplit(self.data, nsub)])
         self.freqs = sub_ctrfreqs
         self.numchans = nsub
 
@@ -158,7 +161,7 @@ class Spectra(object):
                 std = chan.std()
             chan[:] = (chan-median)/std
         return other
-    
+
     def scaled2(self, indep=False):
         """Return a scaled version of the Spectra object.
             When scaling subtract the min from each channel,
@@ -187,7 +190,7 @@ class Spectra(object):
     def masked(self, mask, maskval='median-mid80'):
         """Replace masked data with 'maskval'. Returns
             a masked copy of the Spectra object.
-            
+
             Inputs:
                 mask: An array of boolean values of the same size and shape
                     as self.data. True represents an entry to be masked.
@@ -210,23 +213,23 @@ class Spectra(object):
             chan = other.get_chan(ii)
             # Use 'chan[:]' so update happens in-place
             # this way the change effects other.data
-            if maskval=='mean':
-                maskvals[ii]=np.mean(chan)
-            elif maskval=='median':
-                maskvals[ii]=np.median(chan)
-            elif maskval=='median-mid80':
+            if maskval == 'mean':
+                maskvals[ii] = np.mean(chan)
+            elif maskval == 'median':
+                maskvals[ii] = np.median(chan)
+            elif maskval == 'median-mid80':
                 n = int(np.round(0.1*self.numspectra))
-                maskvals[ii]=np.median(sorted(chan)[n:-n])
+                maskvals[ii] = np.median(sorted(chan)[n:-n])
             else:
-                maskvals[ii]=maskval
-        tmp = np.ones_like(other.data)*maskvals[:,np.newaxis]
+                maskvals[ii] = maskval
+        tmp = np.ones_like(other.data)*maskvals[:, np.newaxis]
         other.data = np.where(mask, tmp, other.data)
         return other
 
     def dedisperse(self, dm=0, padval=0, trim=False):
         """Shift channels according to the delays predicted by
             the given DM.
-            
+
             Inputs:
                 dm: The DM (in pc/cm^3) to use.
                 padval: The padding value to use when shifting
@@ -243,17 +246,17 @@ class Spectra(object):
         assert dm >= 0
         ref_delay = psr_utils.delay_from_DM(dm-self.dm, np.max(self.freqs))
         delays = psr_utils.delay_from_DM(dm-self.dm, self.freqs)
-        rel_delays = delays-ref_delay # Relative delay
+        rel_delays = delays-ref_delay  # Relative delay
         rel_bindelays = np.round(rel_delays/self.dt).astype('int')
         # Shift channels
         self.shift_channels(rel_bindelays, padval)
 
-        self.dm=dm
+        self.dm = dm
 
         if trim:
             ntrim = max(rel_bindelays)
             if ntrim > 0:
-                self.data = self.data[:,:-ntrim]
+                self.data = self.data[:, :-ntrim]
                 self.numspectra -= ntrim
 
     def smooth(self, width=1, padval=0):
@@ -273,35 +276,35 @@ class Spectra(object):
 
             This bit of code is taken from Scott Ransom's
             PRESTO's single_pulse_search.py (line ~ 423).
-            
+
             *** Smoothing is done in place. ***
         """
         if width > 1:
             kernel = np.ones(width, dtype='float32')/np.sqrt(width)
             for ii in range(self.numchans):
                 chan = self.get_chan(ii)
-                if padval=='wrap':
-                    tosmooth = np.concatenate([chan[-width:], \
-                                chan, chan[:width]])
-                elif padval=='mean':
+                if padval == 'wrap':
+                    tosmooth = np.concatenate([chan[-width:],
+                                               chan, chan[:width]])
+                elif padval == 'mean':
                     tosmooth = np.ones(self.numspectra+width*2) * \
-                                np.mean(chan)
+                        np.mean(chan)
                     tosmooth[width:-width] = chan
-                elif padval=='median':
+                elif padval == 'median':
                     tosmooth = np.ones(self.numspectra+width*2) * \
-                                np.median(chan)
+                        np.median(chan)
                     tosmooth[width:-width] = chan
-                else: # padval is a float
+                else:  # padval is a float
                     tosmooth = np.ones(self.numspectra+width*2) * \
-                                padval
+                        padval
                     tosmooth[width:-width] = chan
-                    
+
                 smoothed = scipy.signal.convolve(tosmooth, kernel, 'same')
                 chan[:] = smoothed[width:-width]
-                    
+
     def trim(self, bins=0):
         """Trim the end of the data by 'bins' spectra.
-            
+
             Input:
                 bins: Number of spectra to trim off the end of the observation.
                     If bins is negative trim spectra off the beginning of the
@@ -316,10 +319,10 @@ class Spectra(object):
         if bins == 0:
             return
         elif bins > 0:
-            self.data = self.data[:,:-bins]
+            self.data = self.data[:, :-bins]
             self.numspectra = self.numspectra-bins
         elif bins < 0:
-            self.data = self.data[:,bins:]
+            self.data = self.data[:, bins:]
             self.numspectra = self.numspectra-bins
             self.starttime = self.starttime+bins*self.dt
 
@@ -340,9 +343,9 @@ class Spectra(object):
         """
         assert trim or not (self.numspectra % factor)
         new_num_spectra = self.numspectra/factor
-        num_to_trim = self.numspectra%factor
+        num_to_trim = self.numspectra % factor
         self.trim(num_to_trim)
-        self.data = np.array(np.column_stack([np.sum(subint, axis=1) for \
-                        subint in np.hsplit(self.data,new_num_spectra)]))
+        self.data = np.array(np.column_stack([np.sum(subint, axis=1) for
+                                              subint in np.hsplit(self.data, new_num_spectra)]))
         self.numspectra = new_num_spectra
         self.dt = self.dt*factor
