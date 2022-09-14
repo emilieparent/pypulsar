@@ -8,7 +8,7 @@ Patrick Lazarus, Nov 20th, 2009
 import types
 import numpy as np
 
-from . import calendar
+import calendar
 
 def JD_to_GST(JD):
     """Given Julian Day (JD) return Greenwich mean sidereal time
