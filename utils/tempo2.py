@@ -24,18 +24,19 @@ def get_resids(parfn, timfn, extra_lines=[], binary=False):
     fmt = r'{bat};;{pre};;{err}'
     if binary:
         fmt += r';;{binphase}'
-    pipe = subprocess.Popen(['tempo2', '-output', 'general2', '-f', tmpparfn, \
-                                timfn, '-s', fmt+';;\n'], \
-                                stdout=subprocess.PIPE)
+    pipe = subprocess.Popen(['tempo2', '-output', 'general2', '-f', tmpparfn,
+                             timfn, '-s', fmt+';;\n'],
+                            stdout=subprocess.PIPE)
     stdout, stderr = pipe.communicate()
-    datastr = stdout.split("Starting general2 plugin")[1].split(";;\nFinished general2 plugin")[0]
+    datastr = stdout.split("Starting general2 plugin")[
+        1].split(";;\nFinished general2 plugin")[0]
     data = np.fromstring(datastr, sep=';;')
     if binary:
         ncol = 4
     else:
         ncol = 3
     nrow = data.size/ncol
-    data.shape = (nrow, ncol) 
+    data.shape = (nrow, ncol)
     if extra_lines:
         os.remove(tmpparfn)
     return data.T

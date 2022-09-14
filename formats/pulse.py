@@ -20,10 +20,11 @@ import scipy.signal
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+
 class Pulse:
-    def __init__(self, number, mjd, time, duration, profile, \
-                    origfn, dt, dm, telescope, \
-                    lofreq, chan_width, bw, on_pulse_regions=None):
+    def __init__(self, number, mjd, time, duration, profile,
+                 origfn, dt, dm, telescope,
+                 lofreq, chan_width, bw, on_pulse_regions=None):
         """Create a pulse object. Arguments provided are:
             - number: The pulse number (Counted from beginning 
                                         of an observation.)
@@ -50,16 +51,16 @@ class Pulse:
         self.time = time
         self.duration = duration
         self.profile = profile.flatten()
-        self.N = profile.size # number of samples in the profile
-        self.dt = dt # width of bin (in seconds)
+        self.N = profile.size  # number of samples in the profile
+        self.dt = dt  # width of bin (in seconds)
         self.dm = dm
         self.telescope = telescope
         self.lofreq = lofreq
         self.chan_width = chan_width
         self.bw = bw
         self.origfn = origfn
-        if (type(on_pulse_regions)==list or \
-                type(on_pulse_regions)==np.ndarray) and len(on_pulse_regions):
+        if (type(on_pulse_regions) == list or
+                type(on_pulse_regions) == np.ndarray) and len(on_pulse_regions):
             self.set_onoff_pulse_regions(on_pulse_regions)
         else:
             self.on_pulse = None
@@ -67,7 +68,7 @@ class Pulse:
 
     def __str__(self):
         return "Pulse #: %s\n\tMJD: %0.15f\n\tTime: %8.2f s\n\tDuration: %8.4f s\n" % \
-                    (self.number, self.mjd, self.time, self.duration)
+            (self.number, self.mjd, self.time, self.duration)
 
     def set_onoff_pulse_regions(self, on_pulse_regions):
         """Set the on-pulse and off-pulse regions using
@@ -83,17 +84,18 @@ class Pulse:
         on_pulse = on_pulse[on_pulse.argsort(axis=0).transpose()[0]]
         # Check if there are any overlaps (or inverted pairs)
         if np.any(on_pulse.flat != sorted(on_pulse.flat)):
-            raise OnPulseRegionError("On-pulse regions overlap or are inverted")
+            raise OnPulseRegionError(
+                "On-pulse regions overlap or are inverted")
         else:
             # Everything checks out
             self.on_pulse = on_pulse
-            
+
             # Set off-pulse regions.
             # Be careful if on-pulse starts or ends at beginning
             # or end of rotational phase.
 
             # Flattened version of on_pulse will become off_pulse
-            off_pulse = self.on_pulse.flatten() 
+            off_pulse = self.on_pulse.flatten()
             if off_pulse[0] == 0.0:
                 off_pulse = off_pulse[1:]
             else:
@@ -112,7 +114,7 @@ class Pulse:
             rotational phase (between 0.0 and 1.0).
         """
         if regions is None or len(regions) == 0:
-            regions = [(None, None)] # return all data
+            regions = [(None, None)]  # return all data
         data = []
         for (lo, hi) in regions:
             if lo is None:
@@ -133,12 +135,12 @@ class Pulse:
             together.
         """
         return self.get_data(self.on_pulse)
-    
+
     def get_off_pulse(self):
         """Return numpy array of off-pulse regions concatenated
             together.
         """
-        return self.get_data(self.off_pulse) 
+        return self.get_data(self.off_pulse)
 
     def get_pulse_energies(self):
         """Return on- and off- pulse energies based on scaled 
@@ -171,7 +173,7 @@ class Pulse:
         # Do scaling
         self.profile -= np.mean(off_pulse_region)
         self.profile /= np.std(off_pulse_region)
-    
+
     def downsample(self, downfactor=1):
         """Downsample profile by adding 'downfactor' adjacent
             bins. ('downfactor' must be a factor of the size 
@@ -184,12 +186,13 @@ class Pulse:
             # of the profile. Left over samples will be truncated.
             # This is not ideal so raise an exception.
             if self.N % downfactor != 0:
-                raise "downfactor (%d) is not a factor of profile length (%d)! ... need proper exception." % (downfactor, self.N)
+                raise "downfactor (%d) is not a factor of profile length (%d)! ... need proper exception." % (
+                    downfactor, self.N)
             self.profile = self.profile[:self.N/downfactor*downfactor]
-            self.N = int(self.N/downfactor) # New length of profile
+            self.N = int(self.N/downfactor)  # New length of profile
             self.profile.shape = (self.N, downfactor)
             self.profile = self.profile.sum(axis=1)
-            self.dt *= downfactor 
+            self.dt *= downfactor
 
     def downsample_Nbins(self, N):
         """Downsample profile so final profile has N bins. 
@@ -197,18 +200,20 @@ class Pulse:
             NOTE: The profile attribute of 'self' will be modified.
         """
         if N > self.N:
-            raise "Cannot downsample so new profile (%d) is longer than old profile (%d)! ... need proper exception." % (N, self.N)
+            raise "Cannot downsample so new profile (%d) is longer than old profile (%d)! ... need proper exception." % (
+                N, self.N)
         downfactor = int(self.N/N)
         numleftover = self.N % N
-        leftover = self.profile[self.N - numleftover:] # should be less than downfactor long
+        # should be less than downfactor long
+        leftover = self.profile[self.N - numleftover:]
         self.profile = self.profile[:self.N - numleftover]
         self.profile.shape = (N, downfactor)
         self.profile = self.profile.mean(axis=1)
         # DONT Add leftovers to last bin
         # self.profile[-1] += leftover.sum()
-        self.N = N # New length of profile
+        self.N = N  # New length of profile
         self.dt *= downfactor
-            
+
     def smooth(self, smoothfactor=1):
         """Smooth profile by convolving with tophat of width
             'smoothfactor'. The height of the tophat is chosen
@@ -223,15 +228,15 @@ class Pulse:
         """
         if smoothfactor > 1:
             kernel = np.ones(smoothfactor, dtype='float32') / \
-                        np.sqrt(smoothfactor)
+                np.sqrt(smoothfactor)
             # Wrap profile around to avoid edge
             # effects of the convolution
             #
             # NOTE: This isn't ideal because we're not dealing with a
             #       folded profile. Each pulse is a unique piece of the
             #       timeseries.
-            prof = np.concatenate([self.profile[-smoothfactor:], \
-                                self.profile, self.profile[:smoothfactor]])
+            prof = np.concatenate([self.profile[-smoothfactor:],
+                                   self.profile, self.profile[:smoothfactor]])
             smooth_prof = scipy.signal.convolve(prof, kernel, 'same')
             self.profile = smooth_prof[smoothfactor:-smoothfactor]
 
@@ -243,7 +248,7 @@ class Pulse:
         """
         break_points = np.round(np.linspace(0, self.N, numchunks+1))
         self.profile = scipy.signal.detrend(self.profile, bp=break_points)
-        
+
     def interpolate(self, numsamples):
         """Interpolate profile so it has 'numsamples' across it.
 
@@ -263,13 +268,13 @@ class Pulse:
         """
         downsamp = int(self.N/numsamples)+1
         interp = downsamp*numsamples
-        
+
         # The following settings takes much longer, but is possibly
         # more accurate (when overplotted with above method the two
         # profiles look identical, by eye).
         # downsamp = self.N
         # interp = numsamples * self.N
-        warnings.warn("interp_and_downsamp() may be unreliable")    
+        warnings.warn("interp_and_downsamp() may be unreliable")
         self.interpolate(interp)
         self.downsample(downsamp)
 
@@ -280,7 +285,7 @@ class Pulse:
             return False.
         """
         edges = np.round(np.linspace(0, self.profile.size, numchunks+1))
-        for i in range(0,numchunks):
+        for i in range(0, numchunks):
             if self.profile[edges[i]:edges[i+1]].ptp() == 0:
                 # Current section of profile is flat.
                 # Profile is partially flat.
@@ -288,8 +293,8 @@ class Pulse:
         # No section of profile is flat.
         return False
 
-    def plot(self, basefn=None, downfactor=1, smoothfactor=1, \
-                shownotes=False, decorate=False):
+    def plot(self, basefn=None, downfactor=1, smoothfactor=1,
+             shownotes=False, decorate=False):
         """Plot the pulse profile.
             'basefn' is base filename to use. Default will
             be to use same as original data file's name
@@ -313,24 +318,23 @@ class Pulse:
         copy_of_self.scale()
         plt.figure()
         if decorate:
-           off_pulse = copy_of_self.get_off_pulse()
-           avg = np.mean(off_pulse)
-           std = np.std(off_pulse)
-           max = np.max(copy_of_self.get_on_pulse())
-           plt.axhline(avg, color='k', linestyle='--')
-           plt.axhline(avg+std, color='k', linestyle=':')
+            off_pulse = copy_of_self.get_off_pulse()
+            avg = np.mean(off_pulse)
+            std = np.std(off_pulse)
+            max = np.max(copy_of_self.get_on_pulse())
+            plt.axhline(avg, color='k', linestyle='--')
+            plt.axhline(avg+std, color='k', linestyle=':')
         if shownotes:
             text = "Smooth factor: %d, Downsample factor: %d, Max SNR: %f" % \
-                        (smoothfactor, downfactor, max) 
+                (smoothfactor, downfactor, max)
             plt.figtext(0.05, 0.025, text, size='xx-small')
         if downfactor > 1:
             copy_of_self.downsample(downfactor)
         plt.plot(copy_of_self.profile, 'k-', lw=0.5)
         plt.xlabel("Profile bin")
         plt.title("Pulse #%d" % self.number)
-        plt.savefig("%s.prof%d.ps" % (basefn, self.number), \
-                        orientation='landscape')
-            
+        plt.savefig("%s.prof%d.ps" % (basefn, self.number),
+                    orientation='landscape')
 
     def write_to_file(self, basefn=None):
         """Dump the pulse to file.
@@ -349,18 +353,21 @@ class Pulse:
         file.write("# Pulse Number                    = %d\n" % self.number)
         file.write("# MJD of start of pulse           = %0.15f\n" % self.mjd)
         file.write("# Time into observation (seconds) = %f\n" % self.time)
-        file.write("# Duration of pulse (seconds)     = %0.15f\n" % self.duration)
+        file.write("# Duration of pulse (seconds)     = %0.15f\n" %
+                   self.duration)
         file.write("# Profile bins                    = %d\n" % self.N)
         file.write("# Width of profile bin (seconds)  = %g\n" % self.dt)
         file.write("# Dispersion Measure (cm^-3 pc)   = %f\n" % self.dm)
         file.write("# Telescope                       = %s\n" % self.telescope)
-        file.write("# Low frequency mid-channel (MHz) = %0.15f\n" % self.lofreq)
-        file.write("# Channel width (MHz)             = %0.15f\n" % self.chan_width)
+        file.write("# Low frequency mid-channel (MHz) = %0.15f\n" %
+                   self.lofreq)
+        file.write("# Channel width (MHz)             = %0.15f\n" %
+                   self.chan_width)
         file.write("# Total bandwidth (MHz)           = %0.15f\n" % self.bw)
         if self.on_pulse is not None:
-            for i, (lo,hi) in enumerate(self.on_pulse):
-                file.write("# On-pulse region %2d (phase)      = %f-%f\n" % \
-                                                                    (i,lo,hi))
+            for i, (lo, hi) in enumerate(self.on_pulse):
+                file.write("# On-pulse region %2d (phase)      = %f-%f\n" %
+                           (i, lo, hi))
         file.write("###################################\n")
         for i, val in enumerate(self.profile):
             file.write("%-10d %f\n" % (i, val))
@@ -370,14 +377,14 @@ class Pulse:
         """Create and return a SummedPulse object using
             self as the starting point of the sum.
         """
-        summed_pulse = SummedPulse(self.number, self.mjd, self.time, \
-                                self.duration, self.profile, self.origfn, \
-                                self.dt, self.dm, self.telescope, \
-                                self.lofreq, self.chan_width, self.dm, \
-                                self.on_pulse)
+        summed_pulse = SummedPulse(self.number, self.mjd, self.time,
+                                   self.duration, self.profile, self.origfn,
+                                   self.dt, self.dm, self.telescope,
+                                   self.lofreq, self.chan_width, self.dm,
+                                   self.on_pulse)
         # summed_pulse.scale() ## DEBUG
         return summed_pulse
-        
+
     def __add__(self, other):
         """Add two Pulse objects.
         """
@@ -399,14 +406,15 @@ class SummedPulse(Pulse):
         SummedPulse is very similar to Pulse except it
         keeps track of what pulses have been summed.
     """
-    def __init__(self, number, mjd, time, duration, profile, \
-                    origfn, dt, dm, telescope, lofreq, chan_width, bw, \
-                    on_pulse_regions=None, 
-                    init_registry=None, init_count=1):
+
+    def __init__(self, number, mjd, time, duration, profile,
+                 origfn, dt, dm, telescope, lofreq, chan_width, bw,
+                 on_pulse_regions=None,
+                 init_registry=None, init_count=1):
         # Call superclass' constructor
-        Pulse.__init__(self, number, mjd, time, duration, profile, \
-                    origfn, dt, dm, telescope, lofreq, chan_width, bw, \
-                    on_pulse_regions)
+        Pulse.__init__(self, number, mjd, time, duration, profile,
+                       origfn, dt, dm, telescope, lofreq, chan_width, bw,
+                       on_pulse_regions)
         # Initialize registry to keep track of what pulses are summed
         if init_registry is not None:
             self.pulse_registry = init_registry
@@ -443,31 +451,31 @@ class SummedPulse(Pulse):
             else:
                 self.pulse_registry[other.origfn] = [other.number]
             ocount = 1
-       
+
         # Prepare profiles for summing
         # self.scale()
         copy_of_other = other.make_copy()
         # copy_of_other.scale() ## DEBUG
-        
+
         # Truncate to size of smaller profile
         self.N = np.min([self.N, copy_of_other.N])
         self.duration = np.min([self.duration, copy_of_other.duration])
         self.profile = self.profile[:self.N] + copy_of_other.profile[:self.N]
-        
+
         # Update epoch of pulse
         #
         # NOTE: number is only meaningful if all pulses come from same obs.
         #
         self.number = (self.count * self.number + ocount * other.number) / \
-                                float(self.count + ocount)
+            float(self.count + ocount)
         self.time = (self.count * self.time + ocount * other.time) / \
-                                float(self.count + ocount)
+            float(self.count + ocount)
         self.mjd = (self.count * self.mjd + ocount * other.mjd) / \
-                                float(self.count + ocount)
+            float(self.count + ocount)
 
         # Update count of profiles summed
         self.count += ocount
-        
+
         #
         # NOTE: Should we modify on-pulse region?
         #
@@ -488,7 +496,7 @@ class SummedPulse(Pulse):
                             return True
         else:
             if item.origfn in list(self.pulse_registry.keys()) and \
-                item.number in self.pulse_registry[item.origfn]:
+                    item.number in self.pulse_registry[item.origfn]:
                 return True
         return False
 
@@ -509,22 +517,24 @@ class SummedPulse(Pulse):
         file.write("# Pulse Number                    = %d\n" % self.number)
         file.write("# MJD of start of pulse           = %0.15f\n" % self.mjd)
         file.write("# Time into observation (seconds) = %f\n" % self.time)
-        file.write("# Duration of pulse (seconds)     = %0.15f\n" % self.duration)
+        file.write("# Duration of pulse (seconds)     = %0.15f\n" %
+                   self.duration)
         file.write("# Profile bins                    = %d\n" % self.N)
         file.write("# Width of profile bin (seconds)  = %g\n" % self.dt)
         if self.on_pulse is not None:
-            for i, (lo,hi) in enumerate(self.on_pulse):
-                file.write("# On-pulse region %2d (phase)      = %f-%f\n" % \
-                                                                    (i,lo,hi))
+            for i, (lo, hi) in enumerate(self.on_pulse):
+                file.write("# On-pulse region %2d (phase)      = %f-%f\n" %
+                           (i, lo, hi))
         file.write("# Number of profiles summed       = %d\n" % self.count)
         for fn in list(self.pulse_registry.keys()):
             for num in sorted(self.pulse_registry[fn]):
-                file.write("# Pulse registry                  = %s:%d\n" % \
-                                                                    (fn, num))
+                file.write("# Pulse registry                  = %s:%d\n" %
+                           (fn, num))
         file.write("###################################\n")
         for i, val in enumerate(self.profile):
             file.write("%-10d %f\n" % (i, val))
         file.close()
+
 
 def read_pulse_from_file(filename):
     """Read pulse information from 'filename' and
@@ -559,20 +569,21 @@ def read_pulse_from_file(filename):
         elif line.startswith("# On-pulse region"):
             lo = float(line.split('=')[-1].split('-')[0].strip())
             hi = float(line.split('=')[-1].split('-')[1].strip())
-            on_pulse_regions.append((lo,hi))
+            on_pulse_regions.append((lo, hi))
         elif line.startswith("#"):
             pass
         else:
             # Profile value
             profile.append(float(line.split()[-1].strip()))
-    return Pulse(number, mjd, time, duration, np.array(profile), \
-                    origfn, dt, dm, telescope, \
-                    lofreq, chan_width, bw, on_pulse_regions)
+    return Pulse(number, mjd, time, duration, np.array(profile),
+                 origfn, dt, dm, telescope,
+                 lofreq, chan_width, bw, on_pulse_regions)
 
 
 class OnPulseRegionError(Exception):
     """Error when on-pulse region is ill-defined.
     """
+
     def __init__(self, message):
         self.message = message
 

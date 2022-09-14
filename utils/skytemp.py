@@ -22,14 +22,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 HASLAM_MAP_FILENAME = os.path.join(os.path.dirname(__file__),
-                            "..","lib","lambda_haslam408_dsds.fits")
+                                   "..", "lib", "lambda_haslam408_dsds.fits")
 
-HASLAM_FREQ = 408.0 # MHz
+HASLAM_FREQ = 408.0  # MHz
 SYNCHROTRON_INDEX = -2.7
 
 HASLAM_MAP = None
 
 DEGTORAD = np.pi/180.0
+
 
 def read_map(mapfilename=HASLAM_MAP_FILENAME):
     """Read HEALPix file 'mapfilename' using 'healpy'
@@ -51,15 +52,15 @@ def get_skytemp(gal_long, gal_lat, freq=HASLAM_FREQ, index=SYNCHROTRON_INDEX):
         Notes: * galactic longitude and latitude should be 
                   provided in degrees.
                * frequency should be provided in MHz.
-        
+
         Optional argument:
         index: synchrotron spectrum index
     """
-    
+
     global HASLAM_MAP
     if HASLAM_MAP is None:
         read_map()
-    
+
     # Theta and Phi angles defined as expected by healpy
     # Theta and Phi are given expected by healpy in radians
     # In (theta, phi) the centre of Galaxy is (pi/2, 0)
@@ -70,14 +71,14 @@ def get_skytemp(gal_long, gal_lat, freq=HASLAM_FREQ, index=SYNCHROTRON_INDEX):
     temp_408 = healpy.get_interp_val(HASLAM_MAP, theta, phi)
 
     # Adjust temperatures for given observing frequency
-    temp_obs = change_obsfreq(temp=temp_408, oldfreq=HASLAM_FREQ, \
-                                newfreq=freq, index=index)
+    temp_obs = change_obsfreq(temp=temp_408, oldfreq=HASLAM_FREQ,
+                              newfreq=freq, index=index)
 
     return temp_obs
 
 
-def show_temp_map(freq=HASLAM_FREQ, index=SYNCHROTRON_INDEX, min=None, max=None, \
-                    galcoords=[]):
+def show_temp_map(freq=HASLAM_FREQ, index=SYNCHROTRON_INDEX, min=None, max=None,
+                  galcoords=[]):
     """Show mollweide projection of Haslam map at frequency 'freq',
         using power law index 'index'. Display temperatures in range
         ('min', 'max'). Temperatures outside this range will be clipped
@@ -90,22 +91,23 @@ def show_temp_map(freq=HASLAM_FREQ, index=SYNCHROTRON_INDEX, min=None, max=None,
     gl, gb = np.meshgrid(gal_long, gal_lat)
     temps = get_skytemp(gl, gb, freq=freq, index=index)
     ax = plt.axes(projection='mollweide')
-    plt.imshow(np.log10(temps),extent=(-np.pi, np.pi, -np.pi/2, np.pi/2), aspect=0.5, 
+    plt.imshow(np.log10(temps), extent=(-np.pi, np.pi, -np.pi/2, np.pi/2), aspect=0.5,
                origin='bottom', cmap=plt.get_cmap('gnuplot2'))
     plt.setp(ax.xaxis.get_ticklabels(), visible=False)
     plt.setp(ax.yaxis.get_ticklabels(), visible=False)
     plt.grid(True)
-    #healpy.mollview(change_obsfreq(HASLAM_MAP, HASLAM_FREQ, freq, index), \
+    # healpy.mollview(change_obsfreq(HASLAM_MAP, HASLAM_FREQ, freq, index), \
     #                    min=min, max=max, unit='K', \
     #                    title="All-sky map at %gMHz. " \
     #                            "Haslam et al. (1982) from LAMBDA." % freq)
-    #if galcoords:
+    # if galcoords:
     #    l,b = np.array(galcoords).transpose()
     #    healpy.projscatter(l, b, lonlat=True, marker='x', s=50, lw=1.5)
+
     def keypress(event):
         if event.key in ('q', 'Q'):
             plt.close()
-            
+
     plt.gcf().canvas.mpl_connect('key_press_event', keypress)
     plt.show()
 
@@ -119,54 +121,55 @@ def change_obsfreq(temp, oldfreq, newfreq, index=SYNCHROTRON_INDEX):
 
 def main():
     deg_symb = chr(176).encode("latin-1")
-    
+
     galcoords = []
     if options.galcoords:
-        for l,b in [g.split(',') for g in options.galcoords]:
+        for l, b in [g.split(',') for g in options.galcoords]:
             galcoords.append((float(l), float(b)))
         for l, b in galcoords:
             temp = get_skytemp(l, b, freq=options.freq, index=options.index)
-            print("l=%g%s, b=%g%s, freq=%g, (index=%g): temp=%g K" % \
-                (l, deg_symb, b, deg_symb, options.freq, options.index, temp))
+            print("l=%g%s, b=%g%s, freq=%g, (index=%g): temp=%g K" %
+                  (l, deg_symb, b, deg_symb, options.freq, options.index, temp))
     else:
         sys.stderr.write("No coords provided on command line!\n")
-    
-    if options.show:
-        show_temp_map(freq=options.freq, index=options.index, \
-                        min=options.min, max=options.max, \
-                        galcoords=galcoords)
 
-if __name__=='__main__':
+    if options.show:
+        show_temp_map(freq=options.freq, index=options.index,
+                      min=options.min, max=options.max,
+                      galcoords=galcoords)
+
+
+if __name__ == '__main__':
     import optparse
-    parser = optparse.OptionParser(usage="%prog -g coords [-g coords ...] [options]", \
-                                    description="Compute and return sky temperature " \
-                                                "at given coordiates using Haslam " \
-                                                "et al. all-sky map at 408 MHz.", \
-                                    version="%prog v0.9 (by Patrick Lazarus")
-    parser.add_option('-f', '--freq', dest='freq', type='float', \
-                        help="Observing frequency in MHz. (Default: %g MHz.)" % \
-                        HASLAM_FREQ, default=HASLAM_FREQ)
-    parser.add_option('-i', '--index', dest='index', type='float', \
-                        help="Spectral index to use for power law when " \
-                             "using a different observing frequency. " \
-                             "(Default: %g.)" % SYNCHROTRON_INDEX, \
-                             default=SYNCHROTRON_INDEX)
-    parser.add_option('-g', '--galcoords', dest='galcoords', type='string', \
-                        action='append', \
-                        help="Galactic coords to return temperature for. " \
-                             "Values should be given in degrees. " \
-                             "Longitude and latitude should be seperated " \
-                             "by a comma (no space). Multiple -g/--galcoords " \
+    parser = optparse.OptionParser(usage="%prog -g coords [-g coords ...] [options]",
+                                   description="Compute and return sky temperature "
+                                   "at given coordiates using Haslam "
+                                   "et al. all-sky map at 408 MHz.",
+                                   version="%prog v0.9 (by Patrick Lazarus")
+    parser.add_option('-f', '--freq', dest='freq', type='float',
+                      help="Observing frequency in MHz. (Default: %g MHz.)" %
+                      HASLAM_FREQ, default=HASLAM_FREQ)
+    parser.add_option('-i', '--index', dest='index', type='float',
+                      help="Spectral index to use for power law when "
+                      "using a different observing frequency. "
+                      "(Default: %g.)" % SYNCHROTRON_INDEX,
+                      default=SYNCHROTRON_INDEX)
+    parser.add_option('-g', '--galcoords', dest='galcoords', type='string',
+                      action='append',
+                      help="Galactic coords to return temperature for. "
+                             "Values should be given in degrees. "
+                             "Longitude and latitude should be seperated "
+                             "by a comma (no space). Multiple -g/--galcoords "
                              "options are permitted, at least 1 is required.")
-    parser.add_option('-s', '--show-map', dest='show', action='store_true', \
-                        help='Show map.', default=False)
-    parser.add_option('--min', dest='min', type='float', \
-                        help="Min temp (in Kelvin) for display range when " \
-                             "showing map. All values smaller are shown " \
-                             "as same colour as 'min'.", default=None)
-    parser.add_option('--max', dest='max', type='float', \
-                        help="Max temp (in Kelvin) for display range when " \
-                             "showing map. All values larger are shown " \
-                             "as same colour as 'max'.", default=None)
+    parser.add_option('-s', '--show-map', dest='show', action='store_true',
+                      help='Show map.', default=False)
+    parser.add_option('--min', dest='min', type='float',
+                      help="Min temp (in Kelvin) for display range when "
+                      "showing map. All values smaller are shown "
+                      "as same colour as 'min'.", default=None)
+    parser.add_option('--max', dest='max', type='float',
+                      help="Max temp (in Kelvin) for display range when "
+                      "showing map. All values larger are shown "
+                      "as same colour as 'max'.", default=None)
     options, args = parser.parse_args()
     main()

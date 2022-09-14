@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 
 DEBUG = 0
 
+
 def old_detrend(ydata, xdata=None, mask=None, order=1):
     """Detrend 'data' using a polynomial of given order.
-    
+
         Inputs:
             ydata: A 1D array to be detrended.
             xdata: A 1D array of x-values to use
@@ -42,12 +43,13 @@ def old_detrend(ydata, xdata=None, mask=None, order=1):
     if mask is None:
         unmasked = np.ones(ydata.size, dtype='bool')
     else:
-        unmasked = np.bitwise_not(mask) 
+        unmasked = np.bitwise_not(mask)
     x, resids, rank, s = scipy.linalg.lstsq(A[unmasked], ydata[unmasked])
     print(x)
-    detrended =  ydata - np.dot(A, x)
+    detrended = ydata - np.dot(A, x)
     if DEBUG:
-        fn = "mydetrend_%s.txt" % datetime.datetime.isoformat(datetime.datetime.now())
+        fn = "mydetrend_%s.txt" % datetime.datetime.isoformat(
+            datetime.datetime.now())
         f = open(fn, 'w')
         for val in ydata:
             f.write("%.15g\n" % val)
@@ -62,7 +64,7 @@ def old_detrend(ydata, xdata=None, mask=None, order=1):
 
 def detrend(ydata, xdata=None, order=1, bp=[], numpieces=None):
     """Detrend 'data' using a polynomial of given order.
-    
+
         Inputs:
             ydata: A 1D array to be detrended.
             xdata: A 1D array of x-values to use
@@ -82,9 +84,10 @@ def detrend(ydata, xdata=None, order=1, bp=[], numpieces=None):
     """
     ymasked = np.ma.masked_array(ydata, mask=np.ma.getmaskarray(ydata))
     if xdata is None:
-        xdata = np.ma.masked_array(np.arange(ydata.size), mask=np.ma.getmaskarray(ydata))
+        xdata = np.ma.masked_array(
+            np.arange(ydata.size), mask=np.ma.getmaskarray(ydata))
     detrended = ymasked.copy()
-    
+
     if numpieces is None:
         edges = [0]+bp+[len(ydata)]
     else:
@@ -106,41 +109,41 @@ def detrend(ydata, xdata=None, order=1, bp=[], numpieces=None):
 
 def fit_poly(ydata, xdata, order=1):
     """Fit a polynomial to data using scipy.linalg.lstsq().
-        
+
         Inputs:
             ydata: A 1D array to be detrended.
             xdata: A 1D array of x-values to use
             order: Order of polynomial to use (Default: 1)
-        
+
         Outputs:
             x: An array of polynomial order+1 coefficients
             poly_ydata: A array of y-values of the polynomial evaluated 
                 at the input xvalues.
     """
-    # Convert inputs to masked arrays 
+    # Convert inputs to masked arrays
     # Note these arrays still reference the original data/arrays
     xmasked = np.ma.asarray(xdata)
     ymasked = np.ma.asarray(ydata)
     if not np.ma.count(ymasked):
         # No unmasked values!
-        raise ValueError("Cannot fit polynomial to data. " \
-                        "There are no unmasked values!")
+        raise ValueError("Cannot fit polynomial to data. "
+                         "There are no unmasked values!")
     ycomp = ymasked.compressed()
     xcomp = xmasked.compressed()
 
     powers = np.arange(order+1)
- 
+
     A = np.repeat(xcomp, order+1)
     A.shape = (xcomp.size, order+1)
     A = A**powers
 
     x, resids, rank, s = scipy.linalg.lstsq(A, ycomp)
-    
+
     # Generate decompressed detrended array
     A = np.repeat(xmasked.data, order+1)
     A.shape = (len(xmasked.data), order+1)
     A = A**powers
 
     poly_ydata = np.dot(A, x).squeeze()
-    
+
     return x, poly_ydata

@@ -11,7 +11,8 @@ def main():
         lines = []
         if args.headers is not None:
             for header in args.headers:
-                lines.append('# ' + args.sep.join(header.split(',')).decode('string-escape'))
+                lines.append(
+                    '# ' + args.sep.join(header.split(',')).decode('string-escape'))
         for attrs in args.attrs:
             vals = []
             for attr in attrs.split(','):
@@ -24,18 +25,18 @@ def main():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Get and format information " 
+    parser = argparse.ArgumentParser(description="Get and format information "
                                                  "from prepfold binary files.")
     parser.add_argument("pfdfns", nargs="+",
                         help="Prepfold binary files to grab information from.")
-    parser.add_argument("-a", "--attr", dest='attrs', 
+    parser.add_argument("-a", "--attr", dest='attrs',
                         default=[], action='append',
                         help="Names of attributes to fetch. Multiple attributes "
                              "can be provided. Each should be separated by commas. "
                              "Multiple -a/--attrib flags can be specified. The "
-                             "output from different -a/--attrib flags will be " 
+                             "output from different -a/--attrib flags will be "
                              "separated by newlines.")
-    parser.add_argument("--sep", dest='sep', default=r'\t', 
+    parser.add_argument("--sep", dest='sep', default=r'\t',
                         help="Output separator for attributes on same line.")
     parser.add_argument("--header", dest='headers',
                         default=None, action='append',

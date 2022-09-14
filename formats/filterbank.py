@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A module for reading filterbank files.
-# 
+#
 # NOTE: Uses PRESTO's sigproc.py module to read the
 #       filterbank file's header
 #
@@ -15,13 +15,14 @@ import sigproc
 
 from pypulsar.formats import spectra
 
+
 class filterbank:
     def __init__(self, filfn):
         self.filename = filfn
         self.already_read_header = False
         self.header_params = []
         self.header = {}
-        self.header_size = None # size of header in bytes
+        self.header_size = None  # size of header in bytes
         self.data_size = None
         self.number_of_samples = None
         self.dtype = None
@@ -31,7 +32,7 @@ class filterbank:
             self.filfile = open(filfn, 'rb')
             self.read_header()
             self.compute_frequencies()
-            
+
     def __getattr__(self, name):
         return self.header[name]
 
@@ -52,7 +53,7 @@ class filterbank:
                 param, val = sigproc.read_hdr_val(self.filfile)
                 self.header[param] = val
                 self.header_params.append(param)
-            
+
             # Calculate additional information
             # Such as: datatype, numsamps, datasize, hdrsize
             if self.nbits == 32:
@@ -89,7 +90,7 @@ class filterbank:
         """
         Read one sample starting at current
         position. Return as numpy array.
-        
+
         NOTE: No checks are made to see if 
               current position is start of
               a sample.
@@ -109,14 +110,14 @@ class filterbank:
         """
         Read N samples starting at current
         position. Return as numpy array.
-        
+
         NOTE: No checks are made to see if 
               current position is start of
               a sample.
         """
         self.read_header()
         return np.fromfile(self.filfile, dtype=self.dtype, count=self.nchans*N)
-    
+
     def seek_to_header_start(self):
         self.filfile.seek(0)
 
@@ -131,27 +132,26 @@ class filterbank:
         """
         self.read_header()
         self.filfile.seek(self.header_size + self.nbits/8*self.nchans*sampnum)
-        
+
     def seek_to_position(self, posn):
         """
         See to position 'posn' relative to
         beginning of file.
         """
         self.filfile.seek(posn)
-    
+
     def get_spectra(self, startsamp, N):
         """Return 2D array of data from filterbank file.
- 
+
             Inputs:
                 startsamp: Starting sample
                 N: number of samples to read
- 
+
             Output:
                 data: 2D numpy array
         """
         self.seek_to_sample(startsamp)
         data = self.read_Nsamples(N)
         data.shape = (N, self.header['nchans'])
-        return spectra.Spectra(self.frequencies, self.tsamp, data.T, \
-                                starttime=self.tsamp*startsamp, dm=0)
-
+        return spectra.Spectra(self.frequencies, self.tsamp, data.T,
+                               starttime=self.tsamp*startsamp, dm=0)

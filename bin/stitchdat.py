@@ -17,12 +17,13 @@ from pypulsar.formats import datfile
 def sort_by_mjd(datfiles):
     """Given a list of Datfile objects sort it in place by start time.
     """
-    cmp_mjd = lambda dat1, dat2: cmp(dat1.infdata.epoch, dat2.infdata.epoch)
+    def cmp_mjd(dat1, dat2): return cmp(dat1.infdata.epoch, dat2.infdata.epoch)
     datfiles.sort(cmp=cmp_mjd)
 
 
 def main():
-    warnings.warn("Not checking if all .dat files have same observing band and sample time.")
+    warnings.warn(
+        "Not checking if all .dat files have same observing band and sample time.")
     datfiles = [datfile.Datfile(datfn) for datfn in options.infiles]
     sort_by_mjd(datfiles)
 
@@ -35,7 +36,7 @@ def main():
     datfiles[0].close()
     data.tofile(outfile)
     numsamps += data.size
-    for ii in range(1,len(datfiles)):
+    for ii in range(1, len(datfiles)):
         print("Working on", os.path.split(datfiles[ii].datfn)[1])
         # Calculate number of padvalues required
         mjd_diff = datfiles[ii].currmjd_actual - datfiles[ii-1].currmjd_actual
@@ -50,8 +51,8 @@ def main():
         if options.debug:
             print("Padding by %d samples" % numpadvals)
             print("Value used for padding: %g" % padval)
-            print("Padding by integer number of bins caused %f bins to be " \
-                    "discarded/added" % (samp_diff-numpadvals))
+            print("Padding by integer number of bins caused %f bins to be "
+                  "discarded/added" % (samp_diff-numpadvals))
         padvals.tofile(outfile)
         numsamps += padvals.size
 
@@ -71,20 +72,21 @@ def main():
 
     print("Total number of samples written:", numsamps)
 
-if __name__=='__main__':
-    parser = optparse.OptionParser(usage='%prog [options] infiles', \
-                description="Stitch together multiple .dat files to" \
-                            "form a longer observation. Padding will" \
-                            "be performed as needed.", \
-                prog="stitchdat.py", version="Patrick Lazarus, v0.1")
-    parser.add_option('-o', '--outname', dest='outname', type='string', \
-                help="Output filename.", default=None)
-    parser.add_option('-d', '--debug', dest='debug', action='store_true', \
-                help="Print useful debugging information. " \
-                     "(Default: Don't print debug info.)", default=False)
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(usage='%prog [options] infiles',
+                                   description="Stitch together multiple .dat files to"
+                                   "form a longer observation. Padding will"
+                                   "be performed as needed.",
+                                   prog="stitchdat.py", version="Patrick Lazarus, v0.1")
+    parser.add_option('-o', '--outname', dest='outname', type='string',
+                      help="Output filename.", default=None)
+    parser.add_option('-d', '--debug', dest='debug', action='store_true',
+                      help="Print useful debugging information. "
+                      "(Default: Don't print debug info.)", default=False)
     (options, args) = parser.parse_args()
 
-    if len(args)==0:
+    if len(args) == 0:
         parser.print_help()
         sys.exit(1)
     else:
@@ -95,7 +97,7 @@ if __name__=='__main__':
         sys.exit(2)
 
     if options.outname is None:
-        sys.stderr.write("An outname must be provided. " \
-                            "(Use -o/--outname on command line).\n")
+        sys.stderr.write("An outname must be provided. "
+                         "(Use -o/--outname on command line).\n")
         sys.exit(3)
     main()

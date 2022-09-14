@@ -22,7 +22,7 @@ from astro_utils import calendar
 from pypulsar.formats import psrfits
 
 COORDS_TABLE = "/homes/borgii/alfa/svn/workingcopy_PL/PALFA/miscellaneous/" + \
-                "PALFA_coords_table.txt"
+    "PALFA_coords_table.txt"
 
 date_re = re.compile(r'^(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})$')
 time_re = re.compile(r'^(?P<hour>\d{2}):(?P<min>\d{2}):(?P<sec>\d{2})$')
@@ -36,7 +36,7 @@ def autogen_dataobj(fns, verbose=False, *args, **kwargs):
     """
     for objname in globals():
         obj = eval(objname)
-        if type(obj)==type and issubclass(obj, Data):
+        if type(obj) == type and issubclass(obj, Data):
             if obj.is_correct_filetype(fns):
                 if verbose:
                     print("Using %s" % objname)
@@ -58,7 +58,7 @@ class Data(object):
 
     def __init__(self, fns):
         self.fns = fns
-        self.posn_corrected = False # Have RA/Dec been corrected in file header
+        self.posn_corrected = False  # Have RA/Dec been corrected in file header
 
     def get_correct_positions(self):
         """Reconstruct original wapp filename and check
@@ -67,13 +67,13 @@ class Data(object):
 
             Returns nothing, updates object in place.
         """
-        wappfn = '.'.join([self.project_id, self.source_name, \
-                            "wapp%d" % (self.beam_id/2+1), \
-                            "%5d" % int(self.timestamp_mjd), \
-                            self.fnmatch(self.original_file).groupdict()['scan']])
+        wappfn = '.'.join([self.project_id, self.source_name,
+                           "wapp%d" % (self.beam_id/2+1),
+                           "%5d" % int(self.timestamp_mjd),
+                           self.fnmatch(self.original_file).groupdict()['scan']])
         # Get corrected beam positions
-        matches = [line for line in open(COORDS_TABLE, 'r') if \
-                        line.startswith(wappfn)]
+        matches = [line for line in open(COORDS_TABLE, 'r') if
+                   line.startswith(wappfn)]
         if len(matches) == 0 and self.timestamp_mjd > 54651:
             # No corrected coords found, but coordinate problem is fixed,
             # so use header values.
@@ -96,14 +96,17 @@ class Data(object):
                 self.correct_ra, self.correct_decl = matches[0].split()[3:5]
             self.right_ascension = float(self.correct_ra.replace(':', ''))
             self.declination = float(self.correct_decl.replace(':', ''))
-            self.ra_deg = float(protractor.convert(self.correct_ra, 'hmsstr', 'deg')[0])
-            self.dec_deg = float(protractor.convert(self.correct_decl, 'dmsstr', 'deg')[0])
-            l, b = sextant.equatorial_to_galactic(self.correct_ra, self.correct_decl, \
-                                    'sexigesimal', 'deg', J2000=True)
+            self.ra_deg = float(protractor.convert(
+                self.correct_ra, 'hmsstr', 'deg')[0])
+            self.dec_deg = float(protractor.convert(
+                self.correct_decl, 'dmsstr', 'deg')[0])
+            l, b = sextant.equatorial_to_galactic(self.correct_ra, self.correct_decl,
+                                                  'sexigesimal', 'deg', J2000=True)
             self.galactic_longitude = float(l[0])
             self.galactic_latitude = float(b[0])
         else:
-            raise ValueError("Bad number of matches (%d) in coords table!" % len(matches))
+            raise ValueError(
+                "Bad number of matches (%d) in coords table!" % len(matches))
 
     # These are class methods.
     # They don't need to be called with an instance.
@@ -113,7 +116,7 @@ class Data(object):
         """
         fn = os.path.split(filename)[-1]
         return cls.filename_re.match(fn)
-    
+
     @classmethod
     def is_correct_filetype(cls, filenames):
         """Check if the Data class accurately describes the
@@ -130,32 +133,36 @@ class Data(object):
 class WappData(Data):
     """PALFA WAPP Data object.
     """
+
     def __init__(self, wappfns, beamnum):
         """WAPP Data object constructor.
         """
         super(WappData, self).__init__(wappfns)
         # Open wapp files, sort by offset since start of observation
-        cmp_offset = lambda w1,w2: cmp(w1.header['timeoff'], w2.header['timeoff'])
+        def cmp_offset(w1, w2): return cmp(
+            w1.header['timeoff'], w2.header['timeoff'])
         self.wapps = sorted([wapp.wapp(fn) for fn in wappfns], cmp=cmp_offset)
         w0 = self.wapps[0]
-        
+
         # Check WAPP files are from the same observation
-        if False in [w0.header['src_name'] == w.header['src_name'] \
-                        for w in self.wapps]:
+        if False in [w0.header['src_name'] == w.header['src_name']
+                     for w in self.wapps]:
             raise ValueError("Source name is not consistent in all files.")
-        if False in [w0.header['obs_date'] == w.header['obs_date'] \
-                        for w in self.wapps]:
-            raise ValueError("Observation date is not consistent in all files.")
-        if False in [w0.header['start_time'] == w.header['start_time'] \
-                        for w in self.wapps]:
+        if False in [w0.header['obs_date'] == w.header['obs_date']
+                     for w in self.wapps]:
+            raise ValueError(
+                "Observation date is not consistent in all files.")
+        if False in [w0.header['start_time'] == w.header['start_time']
+                     for w in self.wapps]:
             raise ValueError("Start time is not consistent in all files.")
         # Divide number of samples by 2 because beams are multiplexed
         # First entry is 0 because first file is start of observation
         sampoffset = np.cumsum([0]+[w.number_of_samples/2 for w in self.wapps])
-        if False in [w.header['timeoff']==samps for (w,samps) in \
-                        zip(self.wapps, sampoffset)]:
-            raise ValueError("Offset since start of observation not consistent.")
-        
+        if False in [w.header['timeoff'] == samps for (w, samps) in
+                     zip(self.wapps, sampoffset)]:
+            raise ValueError(
+                "Offset since start of observation not consistent.")
+
         self.original_file = os.path.split(w0.filename)[-1]
         matchdict = self.fnmatch(self.original_file).groupdict()
         if 'beam' in matchdict:
@@ -170,29 +177,29 @@ class WappData(Data):
         self.center_freq = w0.header['cent_freq']
         self.num_channels_per_record = w0.header['num_lags']
         # ALFA band is inverted
-        self.channel_bandwidth = -abs(w0.header['bandwidth'] / \
-                                    float(self.num_channels_per_record))
+        self.channel_bandwidth = -abs(w0.header['bandwidth'] /
+                                      float(self.num_channels_per_record))
         self.num_ifs = w0.header['nifs']
-        self.sample_time = w0.header['samp_time'] # in micro seconds
+        self.sample_time = w0.header['samp_time']  # in micro seconds
         self.sum_id = w0.header['sum']
-        
+
         # Compute timestamp_mjd
         date = date_re.match(w0.header['obs_date']).groupdict()
         time = time_re.match(w0.header['start_time']).groupdict()
-        dayfrac = (int(time['hour']) + \
-                    (int(time['min']) + \
+        dayfrac = (int(time['hour']) +
+                   (int(time['min']) +
                     (int(time['sec']) / 60.0)) / 60.0) / 24.0
-        day = calendar.date_to_MJD(int(date['year']), int(date['month']), \
-                                    int(date['day']))
+        day = calendar.date_to_MJD(int(date['year']), int(date['month']),
+                                   int(date['day']))
         self.timestamp_mjd = day + dayfrac
 
         # Combine obs_name
         scan = matchdict()['scan']
-        self.obs_name = '.'.join([self.project_id, self.source_name, \
-                                    str(int(self.timestamp_mjd)), \
-                                    scan])
-        
-        # Get beam positions 
+        self.obs_name = '.'.join([self.project_id, self.source_name,
+                                  str(int(self.timestamp_mjd)),
+                                  scan])
+
+        # Get beam positions
         self.beam_id = beamnum
         if beamnum == 7:
             b = 6
@@ -204,22 +211,23 @@ class WappData(Data):
         self.orig_start_za = w0.header['alfa_za'][b]
         self.orig_ra_deg = w0.header['alfa_raj'][b]*15.0
         self.orig_dec_deg = w0.header['alfa_decj'][b]
-        self.orig_right_ascension = float(protractor.convert(self.orig_ra_deg, \
-                                        'deg', 'hmsstr')[0].replace(':', ''))
-        self.orig_declination = float(protractor.convert(self.orig_dec_deg, \
-                                        'deg', 'dmsstr')[0].replace(':', ''))
-        l, b = sextant.equatorial_to_galactic(self.orig_ra_deg, self.orig_dec_deg, \
-                                            'deg', 'deg', J2000=True)
+        self.orig_right_ascension = float(protractor.convert(self.orig_ra_deg,
+                                                             'deg', 'hmsstr')[0].replace(':', ''))
+        self.orig_declination = float(protractor.convert(self.orig_dec_deg,
+                                                         'deg', 'dmsstr')[0].replace(':', ''))
+        l, b = sextant.equatorial_to_galactic(self.orig_ra_deg, self.orig_dec_deg,
+                                              'deg', 'deg', J2000=True)
         self.orig_galactic_longitude = float(l)
         self.orig_galactic_latitude = float(b)
         self.get_correct_positions()
 
+
 class MultiplexedWappData(WappData):
     """WAPP Headers of multiplexed PALFA data.
     """
-    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})\.(?P<source>.*)\.' \
-                                r'wapp(?P<wapp>\d)\.(?P<mjd>\d{5})\.' \
-                                r'(?P<scan>\d{4})$')
+    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})\.(?P<source>.*)\.'
+                             r'wapp(?P<wapp>\d)\.(?P<mjd>\d{5})\.'
+                             r'(?P<scan>\d{4})$')
 
     def __init__(self, wappfns, beamnum):
         """Constructor for MultiplexedWappData objects.
@@ -239,9 +247,9 @@ class DumpOfWappData(WappData):
     """Dump of PALFA WAPP Data.
         These dumps are produced when converting from WAPP to PSR fits.
     """
-    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})_(?P<mjd>\d{5})_' \
-                                r'(?P<sec>\d{5})_(?P<scan>\d{4})_' \
-                                r'(?P<source>.*)_(?P<beam>\d)\.w4bit\.wapp_hdr$')
+    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})_(?P<mjd>\d{5})_'
+                             r'(?P<sec>\d{5})_(?P<scan>\d{4})_'
+                             r'(?P<source>.*)_(?P<beam>\d)\.w4bit\.wapp_hdr$')
 
     def __init__(self, wappfns):
         """Dump of PALFA WAPP Data constructor.
@@ -261,33 +269,35 @@ class DumpOfWappData(WappData):
 class PsrfitsData(Data):
     """PSRFITS Data object.
     """
+
     def __init__(self, fitsfns):
         """PSR fits Header object constructor.
         """
         super(PsrfitsData, self).__init__(fitsfns)
         # Read information from files
         self.specinfo = psrfits.SpectraInfo(self.fns)
-        self.original_file = os.path.split(sorted(self.specinfo.filenames)[0])[-1]
+        self.original_file = os.path.split(
+            sorted(self.specinfo.filenames)[0])[-1]
         self.project_id = self.specinfo.project_id
         self.observers = self.specinfo.observer
         self.source_name = self.specinfo.source
         self.center_freq = self.specinfo.fctr
         self.num_channels_per_record = self.specinfo.num_channels
-        self.channel_bandwidth = self.specinfo.df*1000.0 # In kHz
-        self.sample_time = self.specinfo.dt*1e6 # In microseconds
+        self.channel_bandwidth = self.specinfo.df*1000.0  # In kHz
+        self.sample_time = self.specinfo.dt*1e6  # In microseconds
         self.sum_id = int(self.specinfo.summed_polns)
         self.timestamp_mjd = self.specinfo.start_MJD[0]
-        self.start_lst = self.specinfo.start_lst 
+        self.start_lst = self.specinfo.start_lst
         self.orig_start_az = self.specinfo.azimuth
         self.orig_start_za = self.specinfo.zenith_ang
         self.orig_ra_deg = self.specinfo.ra2000
         self.orig_dec_deg = self.specinfo.dec2000
-        self.orig_right_ascension = float(protractor.convert(self.orig_ra_deg, \
-                                        'deg', 'hmsstr')[0].replace(':', ''))
-        self.orig_declination = float(protractor.convert(self.orig_dec_deg, \
-                                        'deg', 'dmsstr')[0].replace(':', ''))
-        l, b = sextant.equatorial_to_galactic(self.orig_ra_deg, self.orig_dec_deg, \
-                                            'deg', 'deg', J2000=True)
+        self.orig_right_ascension = float(protractor.convert(self.orig_ra_deg,
+                                                             'deg', 'hmsstr')[0].replace(':', ''))
+        self.orig_declination = float(protractor.convert(self.orig_dec_deg,
+                                                         'deg', 'dmsstr')[0].replace(':', ''))
+        l, b = sextant.equatorial_to_galactic(self.orig_ra_deg, self.orig_dec_deg,
+                                              'deg', 'deg', J2000=True)
         self.orig_galactic_longitude = float(l)
         self.orig_galactic_latitude = float(b)
 
@@ -295,17 +305,17 @@ class PsrfitsData(Data):
         self.observation_time = self.specinfo.T
         self.num_samples = self.specinfo.N
         self.data_size = self.num_samples * \
-                            self.specinfo.bits_per_sample/8.0 * \
-                            self.num_channels_per_record
+            self.specinfo.bits_per_sample/8.0 * \
+            self.num_channels_per_record
         self.num_samples_per_record = self.specinfo.spectra_per_subint
 
 
 class WappPsrfitsData(PsrfitsData):
     """PSRFITS Data object for WAPP data.
     """
-    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})_(?P<mjd>\d{5})_' \
-                                r'(?P<sec>\d{5})_(?P<scan>\d{4})_' \
-                                r'(?P<source>.*)_(?P<beam>\d)\.w4bit\.fits$')
+    filename_re = re.compile(r'^(?P<projid>[Pp]\d{4})_(?P<mjd>\d{5})_'
+                             r'(?P<sec>\d{5})_(?P<scan>\d{4})_'
+                             r'(?P<source>.*)_(?P<beam>\d)\.w4bit\.fits$')
 
     def __init__(self, fitsfns):
         super(WappPsrfitsData, self).__init__(fitsfns)
@@ -315,37 +325,37 @@ class WappPsrfitsData(PsrfitsData):
         self.get_correct_positions()
         # Note Puerto Rico doesn't observe daylight savings time
         # so it is 4 hours behind UTC all year
-        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1]%1
+        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1] % 1
         self.start_ast = int((dayfrac*24-4)*3600)
         self.start_ast %= 24*3600
-        self.num_ifs = 1 # Hardcoded as 1
+        self.num_ifs = 1  # Hardcoded as 1
         # Parse filename to get the scan number
         m = self.fnmatch(fitsfns[0])
         self.scan_num = m.groupdict()['scan']
-        self.obs_name = '.'.join([self.project_id, self.source_name, \
-                                    str(int(self.timestamp_mjd)), \
-                                    str(self.scan_num)])
+        self.obs_name = '.'.join([self.project_id, self.source_name,
+                                  str(int(self.timestamp_mjd)),
+                                  str(self.scan_num)])
 
     def update_positions(self):
         """Update positions in raw data file's header.
-            
+
             Note: This cannot be undone!
         """
         if self.posn_corrected:
             for fn in self.fns:
                 hdus = pyfits.open(fn, mode='update')
                 primary = hdus['PRIMARY'].header
-                primary['RA'] = self.correct_ra 
+                primary['RA'] = self.correct_ra
                 primary['DEC'] = self.correct_decl
-                hdus.close() # hdus are updated at close-time
+                hdus.close()  # hdus are updated at close-time
 
 
 class MockPsrfitsData(PsrfitsData):
     """PSR fits Data object for MockSpec data.
     """
-    filename_re = re.compile(r'^4bit-(?P<projid>[Pp]\d{4})\.(?P<date>\d{8})\.' \
-                                r'(?P<source>.*)\.b(?P<beam>[0-7])' \
-                                r's(?P<subband>[01])g0.(?P<scan>\d{5})\.fits')
+    filename_re = re.compile(r'^4bit-(?P<projid>[Pp]\d{4})\.(?P<date>\d{8})\.'
+                             r'(?P<source>.*)\.b(?P<beam>[0-7])'
+                             r's(?P<subband>[01])g0.(?P<scan>\d{5})\.fits')
 
     def __init__(self, fitsfns):
         super(MockPsrfitsData, self).__init__(fitsfns)
@@ -354,31 +364,31 @@ class MockPsrfitsData(PsrfitsData):
             raise ValueError("Beam number not encoded in PSR fits header.")
         # Note Puerto Rico doesn't observe daylight savings time
         # so it is 4 hours behind UTC all year
-        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1]%1
+        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1] % 1
         self.start_ast = int((dayfrac*24-4)*3600)
         self.start_ast %= 24*3600
         self.num_ifs = self.specinfo.hdus[1].header['NUMIFS']
         # Parse filename to get the scan number
         m = self.fnmatch(fitsfns[0])
         self.scan_num = m.groupdict()['scan']
-        self.obs_name = '.'.join([self.project_id, self.source_name, \
-                                    str(int(self.timestamp_mjd)), \
-                                    str(self.scan_num)])
+        self.obs_name = '.'.join([self.project_id, self.source_name,
+                                  str(int(self.timestamp_mjd)),
+                                  str(self.scan_num)])
 
 
 class MergedMockPsrfitsData(PsrfitsData):
     """PSRFITS Data object for merged MockSpec data.
     """
-    filename_re = re.compile(r'^4bit-(?P<projid>[Pp]\d{4})\.(?P<date>\d{8})\.' \
-                                r'(?P<source>.*)\.b(?P<beam>[0-7])' \
-                                r'g0\.merged\.(?P<scan>\d{5})_(?P<filenum>\d{4})' \
-                                r'\.fits')
+    filename_re = re.compile(r'^4bit-(?P<projid>[Pp]\d{4})\.(?P<date>\d{8})\.'
+                             r'(?P<source>.*)\.b(?P<beam>[0-7])'
+                             r'g0\.merged\.(?P<scan>\d{5})_(?P<filenum>\d{4})'
+                             r'\.fits')
 
     def __init__(self, fitsfns):
         super(MergedMockPsrfitsData, self).__init__(fitsfns)
         # Note Puerto Rico doesn't observe daylight savings time
         # so it is 4 hours behind UTC all year
-        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1]%1
+        dayfrac = calendar.MJD_to_date(self.timestamp_mjd)[-1] % 1
         self.start_ast = int((dayfrac*24-4)*3600)
         self.start_ast %= 24*3600
         self.num_ifs = 2
@@ -387,10 +397,9 @@ class MergedMockPsrfitsData(PsrfitsData):
         self.beam_id = int(m.groupdict()['beam'])
         self.get_correct_positions()
         self.scan_num = m.groupdict()['scan']
-        self.obs_name = '.'.join([self.project_id, self.source_name, \
-                                    str(int(self.timestamp_mjd)), \
-                                    str(self.scan_num)])
-
+        self.obs_name = '.'.join([self.project_id, self.source_name,
+                                  str(int(self.timestamp_mjd)),
+                                  str(self.scan_num)])
 
 
 def main():
@@ -398,5 +407,5 @@ def main():
     print(data.__dict__)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

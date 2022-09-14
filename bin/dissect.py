@@ -14,6 +14,7 @@ Cut a timeseries into individual pulses.
 Patrick Lazarus, June 16, 2009
 """
 
+import pylab as plt
 import sys
 import os.path
 import optparse
@@ -30,15 +31,14 @@ import ppgplot
 # Import matplotlib/pylab and set for non-interactive plots
 import matplotlib
 matplotlib.use('Agg')
-import pylab as plt
 
 # Constants
-JOYDIV_SEP = 0.5    # vertical separation per profile in same units 
-                    # profiles are plotted in for joydiv plot.
-DEFAULT_WIDTHS = [1,2,4,8,16,32] # Powers of 2
+JOYDIV_SEP = 0.5    # vertical separation per profile in same units
+# profiles are plotted in for joydiv plot.
+DEFAULT_WIDTHS = [1, 2, 4, 8, 16, 32]  # Powers of 2
 # DEFAULT_WIDTHS = [1,2,3,4,6,9,14,20,30] # Default from single_pulse_search.py
-                    # default boxcar widths to use for smoothing
-                    # when searching for pulses.
+# default boxcar widths to use for smoothing
+# when searching for pulses.
 
 
 def main():
@@ -60,15 +60,16 @@ def main():
         print("Using parfile: %s" % options.parfile)
         # generate polycos
         print("Automatically generating polycos...")
-        polycos = mypolycos.create_polycos_from_inf(options.parfile, timeseries.infdata)
+        polycos = mypolycos.create_polycos_from_inf(
+            options.parfile, timeseries.infdata)
         mjd = timeseries.infdata.epoch
-        mjdi = int(mjd) # integer part of mjd
-        mjdf = mjd-mjdi # fractional part of mjd
+        mjdi = int(mjd)  # integer part of mjd
+        mjdf = mjd-mjdi  # fractional part of mjd
         phase, freq = polycos.get_phs_and_freq(mjdi, mjdf)
         if options.on_pulse_regions == [] or options.on_pulse_regions is None:
             # Use polycos to determine on-pulse region
-            fidphase = 1.0-phase # phase of fiducial point in profile
-            if fidphase>=0.9 or fidphase<=0.1:
+            fidphase = 1.0-phase  # phase of fiducial point in profile
+            if fidphase >= 0.9 or fidphase <= 0.1:
                 # Shift start of observation by 0.25 in phase
                 options.shift_phase = phase + 0.25
                 fidphase = (fidphase - 0.25) % 1.0
@@ -85,19 +86,20 @@ def main():
         else:
             prof_start_phase = phase
         # get periods from polycos
-        get_period = lambda mjd: 1.0/polycos.get_phs_and_freq(int(mjd), \
-                                                               mjd-int(mjd))[1]
+
+        def get_period(mjd): return 1.0/polycos.get_phs_and_freq(int(mjd),
+                                                                 mjd-int(mjd))[1]
     elif options.polycofile is not None:
         print("Using polycos file: %s" % options.polycos)
         polycos = mypolycos.polycos(options.polycos)
         mjd = timeseries.infdata.epoch
-        mjdi = int(mjd) # integer part of mjd
-        mjdf = mjd-mjdi # fractional part of mjd
+        mjdi = int(mjd)  # integer part of mjd
+        mjdf = mjd-mjdi  # fractional part of mjd
         phase, freq = polycos.get_phs_and_freq(mjdi, mjdf)
         if options.on_pulse_regions == [] or options.on_pulse_regions is None:
             # Use polycos to determine on-pulse region
-            fidphase = 1.0-phase # phase of fiducial point in profile
-            if fidphase>=0.9 or fidphase<=0.1:
+            fidphase = 1.0-phase  # phase of fiducial point in profile
+            if fidphase >= 0.9 or fidphase <= 0.1:
                 # Shift start of observation by 0.25 in phase
                 options.shift_phase = phase + 0.25
                 fidphase = (fidphase - 0.25) % 1.0
@@ -114,20 +116,21 @@ def main():
         else:
             prof_start_phase = phase
         # get periods from polycos
-        get_period = lambda mjd: 1.0/polycos.get_phs_and_freq(int(mjd), \
-                                                               mjd-int(mjd))[1]
+        def get_period(mjd): return 1.0/polycos.get_phs_and_freq(int(mjd),
+                                                                 mjd-int(mjd))[1]
     elif options.period is not None:
         print("Using constant period: %f" % options.period)
         if options.shift_phase != 0.0:
             shift_time = options.shift_phase * options.period
-        get_period = lambda mjd: options.period
+
+        def get_period(mjd): return options.period
     else:
         raise ValueError("Unknown option for reading periods.")
 
-    print("On-pulse regions will be set to: %s" % \
-            ','.join(['%s:%s' % t for t in options.on_pulse_regions]))
-    print("Boxcar widths to be used: %s" % \
-            ', '.join(['%s' % w for w in options.widths]))
+    print("On-pulse regions will be set to: %s" %
+          ','.join(['%s:%s' % t for t in options.on_pulse_regions]))
+    print("Boxcar widths to be used: %s" %
+          ', '.join(['%s' % w for w in options.widths]))
     print("Single-pulse SNR threshold: %s" % options.threshold)
 
     # Loop over pulses in timeseries. Examine pulses one at a time.
@@ -137,13 +140,13 @@ def main():
     notes = []
     nummasked = 0
     numpulses = 0
-    for current_pulse in timeseries.pulses(get_period, \
-                                    time_to_skip=shift_time):
+    for current_pulse in timeseries.pulses(get_period,
+                                           time_to_skip=shift_time):
         numpulses += 1
         maxsnr = 0
         bestfactor = 0
         current_pulse.set_onoff_pulse_regions(options.on_pulse_regions)
-        if current_pulse.is_masked(numchunks=5) and not options.no_toss: 
+        if current_pulse.is_masked(numchunks=5) and not options.no_toss:
             nummasked += 1
             continue
         for numbins in options.widths:
@@ -154,7 +157,7 @@ def main():
                 snr = 0
             if snr > options.threshold:
                 if snr >= maxsnr:
-                    if maxsnr==0 and bestfactor==0:
+                    if maxsnr == 0 and bestfactor == 0:
                         # First time snr is above threshold
                         snrs.append(snr)
                         notes.append("smoothed by %3d bins" % numbins)
@@ -169,24 +172,23 @@ def main():
                     maxsnr = snr
                     bestfactor = numbins
 
-    print_report(good_pulses, numpulses, nummasked, snrs=snrs, notes=notes, \
-                    quiet=options.quiet)
+    print_report(good_pulses, numpulses, nummasked, snrs=snrs, notes=notes,
+                 quiet=options.quiet)
     if options.create_output_files and len(good_pulses) > 0:
         if options.create_text_files:
             print("Writing pulse text files...")
             write_pulses(good_pulses, timeseries)
         if options.create_plot_files:
             print("Creating pulse plots...")
-            plot_pulses(good_pulses, timeseries, options.downfactor, 
-                            widths=widths)
+            plot_pulses(good_pulses, timeseries, options.downfactor,
+                        widths=widths)
         if options.create_joydiv_plot:
             print("Making JoyDiv plot...")
-            joy_division_plot(good_pulses, timeseries, options.downfactor, \
-                                        options.heightstretch)
-
+            joy_division_plot(good_pulses, timeseries, options.downfactor,
+                              options.heightstretch)
 
     if (options.polycofile is not None or options.parfile is not None) and \
-                options.write_toas and len(good_pulses) > 0:
+            options.write_toas and len(good_pulses) > 0:
         numtoas = 0
         print("Generating TOAs. Please wait...")
         print("TOA threshold:", options.toa_threshold)
@@ -213,25 +215,25 @@ def main():
                 current_pulse.interp_and_downsamp(template.size)
                 # current_pulse.downsample_Nbins(template.size) ## ADDED FOR DEBUGGING
                 current_pulse.scale()
-                pulseshift, templateshift = write_toa(current_pulse, \
-                            polycos, template, timeseries, prof_start_phase, \
-                            options.debug)
+                pulseshift, templateshift = write_toa(current_pulse,
+                                                      polycos, template, timeseries, prof_start_phase,
+                                                      options.debug)
                 numtoas += 1
                 if options.write_toa_files:
                     # TOA profiles are already downfactored
                     # do not downfactor more when creating plot
-                    plot_toa(numtoas, current_pulse, template, \
-                            pulseshift, templateshift)
+                    plot_toa(numtoas, current_pulse, template,
+                             pulseshift, templateshift)
                     current_pulse.write_to_file("TOA%d" % numtoas)
                 current_pulse = None
                 numpulses = 0
         print("Number of TOAs: %d" % numtoas)
-        print("Number of pulses thrown out because 'min pulses' requirement " \
-                "or SNR threshold not met: %d" % numpulses)
+        print("Number of pulses thrown out because 'min pulses' requirement "
+              "or SNR threshold not met: %d" % numpulses)
 
 
-def plot_toa(numtoa, pulse, template=None, pulseshift=0, \
-                templateshift=0, basefn=""):
+def plot_toa(numtoa, pulse, template=None, pulseshift=0,
+             templateshift=0, basefn=""):
     """Plot the profile used for a TOA.
         - 'numtoa' is the TOA's number within an observation.
         - 'pulse' is the SummedPulse object used to generate 
@@ -247,7 +249,7 @@ def plot_toa(numtoa, pulse, template=None, pulseshift=0, \
         outfn = "%s.TOA%d.ps" % (basefn, numtoa)
     else:
         outfn = "TOA%d.ps" % numtoa
-    
+
     # scale pulse
     copy_of_pulse = pulse.make_copy()
     copy_of_pulse.scale()
@@ -266,8 +268,8 @@ def plot_toa(numtoa, pulse, template=None, pulseshift=0, \
     plt.savefig(outfn, orientation='landscape')
 
 
-def write_toa(summed_pulse, polycos, template_profile, \
-                        timeseries, start_phase=0.0, debug=False):
+def write_toa(summed_pulse, polycos, template_profile,
+              timeseries, start_phase=0.0, debug=False):
     """Given a SummedPulse generate a TOA and write it to stdout. 
         A polycos file is required. 'template_profile' is simply 
         a numpy array. 'timeseries' is a Datfile object.
@@ -279,42 +281,44 @@ def write_toa(summed_pulse, polycos, template_profile, \
     if template_profile is None:
         raise ValueError("A template profile MUST be provided.")
     # This code is taken from Scott Ransom's PRESTO's get_TOAs.py
-    mjdi = int(summed_pulse.mjd) # integer part of MJD
-    mjdf = summed_pulse.mjd - mjdi # fractional part of MJD
+    mjdi = int(summed_pulse.mjd)  # integer part of MJD
+    mjdf = summed_pulse.mjd - mjdi  # fractional part of MJD
     (phs, freq) = polycos.get_phs_and_freq(mjdi, mjdf)
     phs -= start_phase
     period = 1.0/freq
-    
+
     # Caclulate offset due to shifting channels to account for DM
-    # Hifreq doesn't have a half-channel offset 
+    # Hifreq doesn't have a half-channel offset
     # (why? because get_TOAs.py doesn't. Why...)
     # Why subtract 1 channel to get hifreq?
     hifreq = timeseries.infdata.lofreq + timeseries.infdata.BW - \
-                timeseries.infdata.chan_width
+        timeseries.infdata.chan_width
     midfreq = timeseries.infdata.lofreq - 0.5*timeseries.infdata.chan_width + \
-                0.5*timeseries.infdata.BW
+        0.5*timeseries.infdata.BW
     dmdelay = psr_utils.delay_from_DM(timeseries.infdata.DM, midfreq) - \
-              psr_utils.delay_from_DM(timeseries.infdata.DM, hifreq)
+        psr_utils.delay_from_DM(timeseries.infdata.DM, hifreq)
     dmdelay_mjd = dmdelay/float(psr_utils.SECPERDAY)
     if debug:
         colour.cprint("High frequency (MHz): %f" % hifreq, 'debug')
         colour.cprint("Mid frequency (MHz): %f" % midfreq, 'debug')
         colour.cprint("DM delay added to TOAs (s): %g" % dmdelay, 'debug')
-        colour.cprint("DM delay added to TOAs (MJD): %g" % dmdelay_mjd, 'debug')
+        colour.cprint("DM delay added to TOAs (MJD): %g" %
+                      dmdelay_mjd, 'debug')
 
     t0f = mjdf - phs*period/psr_utils.SECPERDAY + dmdelay_mjd
     t0i = mjdi
-    shift,eshift,snr,esnr,b,errb,ngood,tphs = measure_phase(summed_pulse.profile, \
-                            template_profile)
-    # tphs is amount template is rotated by. It is originally 
+    shift, eshift, snr, esnr, b, errb, ngood, tphs = measure_phase(summed_pulse.profile,
+                                                                   template_profile)
+    # tphs is amount template is rotated by. It is originally
     # measured in radians, convert to rotational phase
     tphs = tphs/(np.pi*2.0) % 1.0
     # tau and tau_err are the predicted phase of the pulse arrival
     tau, tau_err = shift/summed_pulse.N, eshift/summed_pulse.N
     if debug:
-        colour.cprint("FFTFIT: Shift (bins): %f, Tau (phase): %f" % (shift, tau), 'debug')
-        colour.cprint("FFTFIT: Shift error (bins): %f, Tau error (phase): %f" % \
-                            (eshift, tau_err), 'debug')
+        colour.cprint("FFTFIT: Shift (bins): %f, Tau (phase): %f" %
+                      (shift, tau), 'debug')
+        colour.cprint("FFTFIT: Shift error (bins): %f, Tau error (phase): %f" %
+                      (eshift, tau_err), 'debug')
     # Note: "error" flags are shift = 0.0 and eshift = 999.0
     if (np.fabs(shift) < 1e-7 and np.fabs(eshift-999.0) < 1e-7):
         raise FFTFitError("Error in FFTFIT. Bad return values.")
@@ -326,9 +330,9 @@ def write_toa(summed_pulse, polycos, template_profile, \
         colour.cprint("toaf (MJD): %r" % toaf, 'debug')
     newdays = int(np.floor(toaf))
     obs_code = telescopes.telescope_to_id[timeseries.infdata.telescope]
-    psr_utils.write_princeton_toa(t0i+newdays, toaf-newdays, \
-                                tau_err*period*1e6, midfreq, \
-                                timeseries.infdata.DM, obs=obs_code)
+    psr_utils.write_princeton_toa(t0i+newdays, toaf-newdays,
+                                  tau_err*period*1e6, midfreq,
+                                  timeseries.infdata.DM, obs=obs_code)
     return tau, tphs
 
 
@@ -343,12 +347,12 @@ def measure_phase(profile, template):
         above. pha1 is the last element in the tuple.
     """
     # This code is taken from Scott Ransom's PRESTO's get_TOAs.py
-    c,amp,pha = fftfit.cprof(template)
+    c, amp, pha = fftfit.cprof(template)
     pha1 = pha[0]
     # Rotate the template
-    pha = np.fmod(pha-np.arange(1,len(pha)+1)*pha1, 2.0*np.pi)
-    shift,eshift,snr,esnr,b,errb,ngood = fftfit.fftfit(profile,amp,pha)
-    return shift,eshift,snr,esnr,b,errb,ngood,pha1
+    pha = np.fmod(pha-np.arange(1, len(pha)+1)*pha1, 2.0*np.pi)
+    shift, eshift, snr, esnr, b, errb, ngood = fftfit.fftfit(profile, amp, pha)
+    return shift, eshift, snr, esnr, b, errb, ngood, pha1
 
 
 def get_snr(pulse, uncertainty=1):
@@ -365,16 +369,16 @@ def get_snr(pulse, uncertainty=1):
     return snr
 
 
-def print_report(pulses, numpulses, nummasked, snrs=None, notes=None, \
-                    quiet=False):
+def print_report(pulses, numpulses, nummasked, snrs=None, notes=None,
+                 quiet=False):
     """Print a report given the pulses provided.
     """
     print("Autopsy report:")
     print("\tTotal number of pulses searched: %s" % numpulses)
-    print("\tNumber of pulses thrown out: %s (%5.2f%%)" % (nummasked, \
-                float(nummasked)/numpulses*100))
-    print("\tNumber of good pulses found: %s (%5.2f%%)" % (len(pulses), \
-                float(len(pulses))/numpulses*100))
+    print("\tNumber of pulses thrown out: %s (%5.2f%%)" % (nummasked,
+                                                           float(nummasked)/numpulses*100))
+    print("\tNumber of good pulses found: %s (%5.2f%%)" % (len(pulses),
+                                                           float(len(pulses))/numpulses*100))
     if len(pulses) > 0 and not quiet:
         use_snrs = ""
         use_notes = ""
@@ -382,9 +386,9 @@ def print_report(pulses, numpulses, nummasked, snrs=None, notes=None, \
             use_snrs = "SNR"
         if notes is not None and len(notes) == len(pulses):
             use_notes = "Notes"
-        print("%s%s%s%s%s%s" % ("#".center(7), "MJD".center(15), \
-                                    "Time".center(11), "Duration".center(13), \
-                                    use_snrs.center(9), use_notes))
+        print("%s%s%s%s%s%s" % ("#".center(7), "MJD".center(15),
+                                "Time".center(11), "Duration".center(13),
+                                use_snrs.center(9), use_notes))
         for i, pulse in enumerate(pulses):
             sys.stdout.write(("%d" % pulse.number).center(7))
             sys.stdout.write(("%5.4f" % pulse.mjd).center(15))
@@ -395,7 +399,7 @@ def print_report(pulses, numpulses, nummasked, snrs=None, notes=None, \
             if use_notes:
                 sys.stdout.write("%s" % notes[i])
             sys.stdout.write("\n")
-   
+
 
 def plot_pulses(pulses, timeseries, downfactor=1, widths=None):
     """Plot each pulse into a separate file.
@@ -403,12 +407,12 @@ def plot_pulses(pulses, timeseries, downfactor=1, widths=None):
     """
     if widths is not None:
         for pulse, wid in zip(pulses, widths):
-            pulse.plot(os.path.split(timeseries.basefn)[1], 1, \
-                        smoothfactor=wid, shownotes=True, decorate=True)
+            pulse.plot(os.path.split(timeseries.basefn)[1], 1,
+                       smoothfactor=wid, shownotes=True, decorate=True)
     else:
         for pulse in pulses:
-            pulse.plot(os.path.split(timeseries.basefn)[1], downfactor, \
-                        shownotes=True, decorate=True)
+            pulse.plot(os.path.split(timeseries.basefn)[1], downfactor,
+                       shownotes=True, decorate=True)
 
 
 def joy_division_plot(pulses, timeseries, downfactor=1, hgt_mult=1):
@@ -419,13 +423,13 @@ def joy_division_plot(pulses, timeseries, downfactor=1, hgt_mult=1):
         hgt_mult is a factor to stretch the height of the paper.
     """
     first = True
-    ppgplot.pgbeg("%s.joydiv.ps/CPS" % \
-                    os.path.split(timeseries.basefn)[1], 1, 1)
-    ppgplot.pgpap(10.25, hgt_mult*8.5/11.0) # Letter landscape
+    ppgplot.pgbeg("%s.joydiv.ps/CPS" %
+                  os.path.split(timeseries.basefn)[1], 1, 1)
+    ppgplot.pgpap(10.25, hgt_mult*8.5/11.0)  # Letter landscape
     # ppgplot.pgpap(7.5, 11.7/8.3) # A4 portrait, doesn't print properly
     ppgplot.pgiden()
     ppgplot.pgsci(1)
-    
+
     # Set up main plot
     ppgplot.pgsvp(0.1, 0.9, 0.1, 0.8)
     ppgplot.pglab("Profile bin", "Single pulse profiles", "")
@@ -462,7 +466,7 @@ def joy_division_plot(pulses, timeseries, downfactor=1, hgt_mult=1):
     yspace = 0.1*ymax
     ppgplot.pgswin(0, xmax, ymin-yspace, ymax+yspace)
     for prof in to_plot:
-        ppgplot.pgline(np.arange(0,prof.size), prof)
+        ppgplot.pgline(np.arange(0, prof.size), prof)
     ppgplot.pgbox("BNTS", 0, 0, "BC", 0, 0)
 
     # Set up summed profile plot
@@ -482,6 +486,7 @@ def write_pulses(pulses, timeseries):
     for pulse in pulses:
         pulse.write_to_file()
 
+
 def parse_boxcar_widths(option, opt_str, value, parser):
     """Parse list of boxcar widths from command line.
     """
@@ -498,51 +503,77 @@ def parse_on_pulse_regions(option, opt_str, value, parser):
         on_pulse.append((float(lo), float(hi)))
     setattr(parser.values, option.dest, on_pulse)
 
+
 class FFTFitError(Exception):
     pass
 
+
 if __name__ == '__main__':
-    parser = optparse.OptionParser(usage="%prog --use-parfile PARFILE | --use-polycos POLYCOFILE | -p --period PERIOD [options] infile.dat", description="Given a input timeseries (a PRESTO .dat file) dissect it into individual pulses and record the pulses that surpass the signification threshold. Written by Patrick Lazarus.", version="%prog v0.9 (by Patrick Lazarus)", prog="dissect.py")
-    parser.add_option('-t', '--threshold', dest='threshold', type='float', action='store', help="Only record pulses more significant than this threshold. (Default: 5).", default=5)
-    parser.add_option('-n', '--no-output-files', dest='create_output_files', action='store_false', help="Do not create any output file for each significant pulse detected. (Default: create output files).", default=True)
-    parser.add_option('--debug', dest='debug', action='store_true', help="Display debugging information. (Default: don't display debugging information).", default=False)
-    parser.add_option('--no-text-files', dest='create_text_files', action='store_false', help="Do not create text file for each significant pulse detected. (Default: create text files).", default=True)
-    parser.add_option('-q', '--quiet', dest='quiet', action='store_true', help="Output less information. (Default: Output full information).", default=False)
-    parser.add_option('--no-toss', dest='no_toss', action='store_true', help="Do not toss out any pulses. (Default: Toss out partially masked profiles).", default=False)
-    parser.add_option('-r', '--on-pulse-regions', dest='on_pulse_regions', type='string', action='callback', callback=parse_on_pulse_regions, help="Define (multiple) on-pulse regions. Beginning and end of each region should be separated by ':' and multiple pairs should be separated by ','. No spaces! Values should be given in terms of rotational phase, floats between 0.0 and 1.0. The on-pulse region is applied after the start of the observation has been shifted. (Default: None).", default=None)
-    parser.add_option('-w', '--widths', dest='widths', type='string', action='callback', callback=parse_boxcar_widths, help="Boxcar widths (in number of samples) to use for smoothing profiles when searching for pulses. widths should be comma-separated _without_ spaces. (Default: Smooth with boxcar widths %s)" % DEFAULT_WIDTHS, default=DEFAULT_WIDTHS)
+    parser = optparse.OptionParser(usage="%prog --use-parfile PARFILE | --use-polycos POLYCOFILE | -p --period PERIOD [options] infile.dat",
+                                   description="Given a input timeseries (a PRESTO .dat file) dissect it into individual pulses and record the pulses that surpass the signification threshold. Written by Patrick Lazarus.", version="%prog v0.9 (by Patrick Lazarus)", prog="dissect.py")
+    parser.add_option('-t', '--threshold', dest='threshold', type='float', action='store',
+                      help="Only record pulses more significant than this threshold. (Default: 5).", default=5)
+    parser.add_option('-n', '--no-output-files', dest='create_output_files', action='store_false',
+                      help="Do not create any output file for each significant pulse detected. (Default: create output files).", default=True)
+    parser.add_option('--debug', dest='debug', action='store_true',
+                      help="Display debugging information. (Default: don't display debugging information).", default=False)
+    parser.add_option('--no-text-files', dest='create_text_files', action='store_false',
+                      help="Do not create text file for each significant pulse detected. (Default: create text files).", default=True)
+    parser.add_option('-q', '--quiet', dest='quiet', action='store_true',
+                      help="Output less information. (Default: Output full information).", default=False)
+    parser.add_option('--no-toss', dest='no_toss', action='store_true',
+                      help="Do not toss out any pulses. (Default: Toss out partially masked profiles).", default=False)
+    parser.add_option('-r', '--on-pulse-regions', dest='on_pulse_regions', type='string', action='callback', callback=parse_on_pulse_regions,
+                      help="Define (multiple) on-pulse regions. Beginning and end of each region should be separated by ':' and multiple pairs should be separated by ','. No spaces! Values should be given in terms of rotational phase, floats between 0.0 and 1.0. The on-pulse region is applied after the start of the observation has been shifted. (Default: None).", default=None)
+    parser.add_option('-w', '--widths', dest='widths', type='string', action='callback', callback=parse_boxcar_widths,
+                      help="Boxcar widths (in number of samples) to use for smoothing profiles when searching for pulses. widths should be comma-separated _without_ spaces. (Default: Smooth with boxcar widths %s)" % DEFAULT_WIDTHS, default=DEFAULT_WIDTHS)
     parser.add_option('-s', '--shift-phase', dest='shift_phase', type='float', help="Set provided phase as the beginning of each pulse period. This is done by removing a piece of data from the beginning of the observation. If polycos, or parfile are used, then the phase is given by the polycos. If a constant period is used then the beginning of the observation is assumed to be phase=0.0. (Default: First pulse period begins at start of observation).", default=0.0)
 
-    toa_group = optparse.OptionGroup(parser, "TOA Generation", "The following options are used to determine if/how TOAs are generated.")
-    toa_group.add_option('--toas', dest='write_toas', action='store_true', help="Write TOAs to stdout. A TOA for each pulse will be written out unless --toa-threshold is provided, in which case consecutive pulses will be summed until sum profile's SNR surpases threshold.", default=False)
-    toa_group.add_option('--template', dest='template', type='string', help="Required option if generating TOAs. This is the template profile to use.", default=None)
-    toa_group.add_option('--toa-threshold', dest="toa_threshold", type='float', action='store', help="Threshold SNR for writing out TOAs. (Default: 0).", default=0)
-    toa_group.add_option('--min-pulses', dest="min_pulses", type='int', action='store', help="Minimum number of pulses that must be added for writing out a single TOA. (Default: 1).", default=1)
-    toa_group.add_option('--write-toa-files', dest='write_toa_files', action='store_true', help="Write out profiles used for TOAs as text files and postscript plots. (Default: Don't write out TOA profiles).", default=False)
+    toa_group = optparse.OptionGroup(
+        parser, "TOA Generation", "The following options are used to determine if/how TOAs are generated.")
+    toa_group.add_option('--toas', dest='write_toas', action='store_true',
+                         help="Write TOAs to stdout. A TOA for each pulse will be written out unless --toa-threshold is provided, in which case consecutive pulses will be summed until sum profile's SNR surpases threshold.", default=False)
+    toa_group.add_option('--template', dest='template', type='string',
+                         help="Required option if generating TOAs. This is the template profile to use.", default=None)
+    toa_group.add_option('--toa-threshold', dest="toa_threshold", type='float',
+                         action='store', help="Threshold SNR for writing out TOAs. (Default: 0).", default=0)
+    toa_group.add_option('--min-pulses', dest="min_pulses", type='int', action='store',
+                         help="Minimum number of pulses that must be added for writing out a single TOA. (Default: 1).", default=1)
+    toa_group.add_option('--write-toa-files', dest='write_toa_files', action='store_true',
+                         help="Write out profiles used for TOAs as text files and postscript plots. (Default: Don't write out TOA profiles).", default=False)
     parser.add_option_group(toa_group)
 
-    period_group = optparse.OptionGroup(parser, "Period Determination", "The following options are different methods for determine the spin period of the pulsar. Exactly one of these options must be provided.")
-    period_group.add_option('--use-parfile', dest='parfile', type='string', action='store', help="Determine spin period from polycos generated by tempo using provided parfile.", default=None)
-    period_group.add_option('--use-polycos', dest='polycofile', type='string', action='store', help="Determine spin period from polycos in the provided file.", default=None)
-    period_group.add_option('-p', '--use-period', dest='period', type='float', action='store', help="Use constant period provided (in seconds).", default=None)
+    period_group = optparse.OptionGroup(
+        parser, "Period Determination", "The following options are different methods for determine the spin period of the pulsar. Exactly one of these options must be provided.")
+    period_group.add_option('--use-parfile', dest='parfile', type='string', action='store',
+                            help="Determine spin period from polycos generated by tempo using provided parfile.", default=None)
+    period_group.add_option('--use-polycos', dest='polycofile', type='string', action='store',
+                            help="Determine spin period from polycos in the provided file.", default=None)
+    period_group.add_option('-p', '--use-period', dest='period', type='float',
+                            action='store', help="Use constant period provided (in seconds).", default=None)
     parser.add_option_group(period_group)
 
-    plot_group = optparse.OptionGroup(parser, "Plotting Options", "The following options affect only the output plots, not the data searching.")
-    plot_group.add_option('-d', '--downsample', dest='downfactor', type='int', action='store', help="Down sample profiles by this factor before plotting. (Default: Don't downsample).", default=1)
-    plot_group.add_option('--stretch-height', dest='heightstretch', type='float', action='store', help="Stretch height of JoyDiv plot by this factor. (Default: Do not stretch JoyDiv plot).", default=1)
+    plot_group = optparse.OptionGroup(
+        parser, "Plotting Options", "The following options affect only the output plots, not the data searching.")
+    plot_group.add_option('-d', '--downsample', dest='downfactor', type='int', action='store',
+                          help="Down sample profiles by this factor before plotting. (Default: Don't downsample).", default=1)
+    plot_group.add_option('--stretch-height', dest='heightstretch', type='float', action='store',
+                          help="Stretch height of JoyDiv plot by this factor. (Default: Do not stretch JoyDiv plot).", default=1)
     parser.add_option_group(plot_group)
-    
-    parser.add_option('--no-pulse-plots', dest='create_plot_files', action='store_false', help="Do not create plots for each significant pulse detected. (Default: create plots).", default=True)
-    parser.add_option('--no-joydiv-plot', dest='create_joydiv_plot', action='store_false', help="Do not create Joy Division plot, where every profile is plotted in a single axes separated slightly in the vertical direction. (Default: create JoyDiv plot).", default=True)
 
+    parser.add_option('--no-pulse-plots', dest='create_plot_files', action='store_false',
+                      help="Do not create plots for each significant pulse detected. (Default: create plots).", default=True)
+    parser.add_option('--no-joydiv-plot', dest='create_joydiv_plot', action='store_false',
+                      help="Do not create Joy Division plot, where every profile is plotted in a single axes separated slightly in the vertical direction. (Default: create JoyDiv plot).", default=True)
 
     options, args = parser.parse_args()
 
     # Count number of period determination options are provided
     if (options.parfile is not None) + \
         (options.polycofile is not None) + \
-        (options.period is not None) != 1:
+            (options.period is not None) != 1:
         parser.print_usage()
-        sys.stderr.write("Exactly one (1) period determination option must be provided! Exiting...\n\n")
+        sys.stderr.write(
+            "Exactly one (1) period determination option must be provided! Exiting...\n\n")
         sys.exit(1)
     main()

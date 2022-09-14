@@ -68,7 +68,7 @@ def parse_params(paramstr):
 
 def zaaz_func_factory(params):
     """Return function that is dependent on zenith angle and azimuth
-    
+
         Inputs:
             params: A dictionary of parameters with the following keys:
                 beam_id - ignored
@@ -92,7 +92,8 @@ def zaaz_func_factory(params):
         scaledza = (za - params['ref_za'])/params['halfspan_za']
 
         poly = np.polyval(params['poly_coeffs'][::-1], scaledza)
-        angles = scaledza[:,np.newaxis]*np.arange(1, 1+len(params['cos_coeffs']))*np.pi/2.0
+        angles = scaledza[:, np.newaxis] * \
+            np.arange(1, 1+len(params['cos_coeffs']))*np.pi/2.0
         cos = params['cos_coeffs']*np.cos(angles)
         sin = params['sin_coeffs']*np.sin(angles)
         vals = poly+np.sum(cos, axis=1)+np.sum(sin, axis=1)
@@ -133,6 +134,7 @@ def main():
     plt.ylabel("Tsys (K)")
 
     plt.show()
+
 
 if __name__ == '__main__':
     main()

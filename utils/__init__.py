@@ -29,9 +29,9 @@ def show_progress(iterator, width=0, tot=None, fmt="%d", show_number=False):
             neq = int(width*progfrac+0.5)
             nsp = width-neq
             bar = "["*bool(width) + \
-                    "="*neq + \
-                    " "*nsp + \
-                    "]"*bool(width)
+                "="*neq + \
+                " "*nsp + \
+                "]"*bool(width)
             old = progpcnt
             progpcntstr = fmt % progpcnt
             sys.stdout.write("     " + bar + " %s %% " % progpcntstr)
@@ -42,5 +42,3 @@ def show_progress(iterator, width=0, tot=None, fmt="%d", show_number=False):
         curr += 1
         yield toreturn
     print("Done")
-
-

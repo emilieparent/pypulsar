@@ -16,8 +16,8 @@ import infodata
 from . import pulse
 
 # Define constants and default values
-DTYPE = 'float32'       # binary data in PRESTO's .dat files 
-                        # is stored as 32-bit floats
+DTYPE = 'float32'       # binary data in PRESTO's .dat files
+# is stored as 32-bit floats
 
 
 class Datfile:
@@ -34,7 +34,7 @@ class Datfile:
             # Corrections need to be applied to data from .inf file
             correct_infdata(self.infdata)
         else:
-           raise "Filename (%s) doesn't end with '.dat'"
+            raise "Filename (%s) doesn't end with '.dat'"
         # initialize file, and current sample, time, and MJD counters
         self.rewind()
 
@@ -67,18 +67,18 @@ class Datfile:
             self.currsample = new_curr_sample
             if hasattr(self.infdata, 'epoch'):
                 self.currmjd_actual += self.infdata.dt * N / \
-                                        float(psr_utils.SECPERDAY)
+                    float(psr_utils.SECPERDAY)
             self.currtime_actual += self.infdata.dt * N
             return np.fromfile(self.datfile, dtype=self.dtype, count=N)
-       
+
     def __seek(self, N):
         self.datfile.seek(N*self.bytes_per_sample)
         self.currsample = N
         if hasattr(self.infdata, 'epoch'):
             self.currmjd_actual = self.infdata.dt * N / \
-                                        float(psr_utils.SECPERDAY)
+                float(psr_utils.SECPERDAY)
         self.currtime_actual = self.infdata.dt * N
-        
+
     def __update_desired_time(self, T):
         """Private method:
             Update current desired time and MJD
@@ -110,7 +110,7 @@ class Datfile:
 
             Input:
                 span: The time span for blocks, in seconds (Default: 1s)
-            
+
             Output:
                 spline: The spline object representing the baseline.
         """
@@ -126,8 +126,8 @@ class Datfile:
             meds.append(np.median(block))
             istart = iend
             block = self.read_Tseconds(span)
-    
-        spline = interp.InterpolatedUnivariateSpline(xx, meds, bbox=(0,iend))
+
+        spline = interp.InterpolatedUnivariateSpline(xx, meds, bbox=(0, iend))
         return spline
 
     def write_debaselined(self, span=1.0):
@@ -135,11 +135,11 @@ class Datfile:
 
             Input:
                 span: The time span for blocks, in seconds (Default: 1s)
-            
+
             Output:
                 outfn: The name of the output file.
         """
-        outbase = "%s.debasline" % self.basefn 
+        outbase = "%s.debasline" % self.basefn
         spline = self.get_baseline_spline(span)
         self.rewind()
         data = self.read_all()
@@ -155,13 +155,16 @@ class Datfile:
                 if not line.strip():
                     continue
                 if line.startswith(" Data file name"):
-                    outfile.write(" Data file name without suffix          =  %s\n" % outbase)
+                    outfile.write(
+                        " Data file name without suffix          =  %s\n" % outbase)
                 elif line.startswith(" Number of bins "):
-                    outfile.write(" Number of bins in the time series      =  %d\n" % nout)
+                    outfile.write(
+                        " Number of bins in the time series      =  %d\n" % nout)
                 else:
                     outfile.write(line)
-            outfile.write("    Baseline was removed with 'datafile.py' (by Patrick Lazarus) using a block duration of %g s\n" % span)
-                    
+            outfile.write(
+                "    Baseline was removed with 'datafile.py' (by Patrick Lazarus) using a block duration of %g s\n" % span)
+
         return outbase+'.dat'
 
     def read_Nsamples(self, N):
@@ -183,7 +186,8 @@ class Datfile:
         self.__seek(sample_num)
         self.currtime_desired = T
         if hasattr(self.infdata, 'epoch'):
-            self.currmjd_desired = self.infdata.epoch + T / float(psr_utils.SECPERDAY)
+            self.currmjd_desired = self.infdata.epoch + \
+                T / float(psr_utils.SECPERDAY)
         return sample_num
 
     def read_Tseconds(self, T):
@@ -200,14 +204,12 @@ class Datfile:
             self.__update_desired_time(T)
         return data
 
-
     def read_all(self):
         """Read all samples in datfile and return a numpy array of the data.
             File is rewound before reading.
         """
         self.rewind()
         return self.__read(self.infdata.N)
-
 
     def rewind(self):
         """Rewind file to beginning. Also, reset current time,
@@ -226,7 +228,6 @@ class Datfile:
             # Desired current MJD (keep track of requests)
             self.currmjd_desired = self.infdata.epoch
 
-
     def pulses(self, period_at_mjd, time_to_skip=0.0):
         """Generator method to generate/iterate over pulse
             profiles from datfile.
@@ -237,7 +238,8 @@ class Datfile:
             still called pulse #1)
         """
         if not hasattr(self.infdata, 'epoch'):
-            raise NotImplementedError("Cannot use 'pulses(...)' if there is no MJD in inf file")
+            raise NotImplementedError(
+                "Cannot use 'pulses(...)' if there is no MJD in inf file")
         # Initialize
         self.rewind()
         if time_to_skip > 0.0:
@@ -257,14 +259,14 @@ class Datfile:
         current_pulse = self.read_Tseconds(current_period)
         while current_pulse is not None:
             # yield (return) current pulse (and other information)
-            yield pulse.Pulse(number=pulse_number, mjd=current_mjd, \
-                              time=current_time, duration=current_period, \
-                              profile=current_pulse, origfn=self.datfn, \
-                              dt=self.infdata.dt, dm=self.infdata.DM, \
-                              telescope=self.infdata.telescope, \
-                              lofreq=self.infdata.lofreq, \
-                              chan_width=self.infdata.chan_width, \
-                              bw = self.infdata.BW)
+            yield pulse.Pulse(number=pulse_number, mjd=current_mjd,
+                              time=current_time, duration=current_period,
+                              profile=current_pulse, origfn=self.datfn,
+                              dt=self.infdata.dt, dm=self.infdata.DM,
+                              telescope=self.infdata.telescope,
+                              lofreq=self.infdata.lofreq,
+                              chan_width=self.infdata.chan_width,
+                              bw=self.infdata.BW)
             # Update pulse number, mjd, period and pulse
             pulse_number += 1
             current_time = self.currtime_actual
@@ -272,14 +274,15 @@ class Datfile:
             current_period = period_at_mjd(current_mjd)
             current_pulse = self.read_Tseconds(current_period)
 
+
 def correct_infdata(inf):
     """Only argument is an infodata object. The infodata object
         is corrected in place (nothing is returned).
-        
+
         The following is an emperical correction for SPIGOT
         data. The comment and code are taken from Scott Ransom's
         PRESTO's prepfold.py
-        
+
         The following "fixes" (we think) the observing frequency of the Spigot
         based on tests done by Ingrid on 0737 (comparing it to GASP)
         The same sorts of corrections should be made to WAPP data as well...
@@ -287,24 +290,28 @@ def correct_infdata(inf):
         Note that epoch is only double precision and so the floating
         point accuracy is ~1 us!
     """
-    if inf.telescope=='GBT':
+    if inf.telescope == 'GBT':
         if np.fabs(np.fmod(inf.dt, 8.192e-05) < 1e-12) and \
-           ("spigot" in inf.instrument.lower() or \
-            "guppi" not in inf.instrument.lower()):
-            if inf.chan_width==800.0/1024: # Spigot 800 MHz mode 2
+           ("spigot" in inf.instrument.lower() or
+                "guppi" not in inf.instrument.lower()):
+            if inf.chan_width == 800.0/1024:  # Spigot 800 MHz mode 2
                 inf.lofreq -= 0.5 * inf.chan_width
                 # original values
                 #if inf.epoch > 0.0: inf.epoch += 0.039334/86400.0
                 # values measured with 1713+0747 wrt BCPM2 on 13 Sept 2007
-                if inf.epoch > 0.0: inf.epoch += 0.039365/86400.0
-            elif inf.chan_width==800.0/2048:
+                if inf.epoch > 0.0:
+                    inf.epoch += 0.039365/86400.0
+            elif inf.chan_width == 800.0/2048:
                 inf.lofreq -= 0.5 * inf.chan_width
                 if inf.epoch < 53700.0:  # Spigot 800 MHz mode 16 (downsampled)
-                    if inf.epoch > 0.0: inf.tepoch += 0.039352/86400.0
+                    if inf.epoch > 0.0:
+                        inf.tepoch += 0.039352/86400.0
                 else:  # Spigot 800 MHz mode 14
                     # values measured with 1713+0747 wrt BCPM2 on 13 Sept 2007
-                    if inf.epoch > 0.0: inf.epoch += 0.039365/86400.0
-            elif inf.chan_width==50.0/1024 or inf.chan_width==50.0/2048: # Spigot 50 MHz modes
+                    if inf.epoch > 0.0:
+                        inf.epoch += 0.039365/86400.0
+            elif inf.chan_width == 50.0/1024 or inf.chan_width == 50.0/2048:  # Spigot 50 MHz modes
                 inf.lofreq += 0.5 * inf.chan_width
                 # Note: the offset has _not_ been measured for the 2048-lag mode
-                if inf.epoch > 0.0: inf.epoch += 0.039450/86400.0
+                if inf.epoch > 0.0:
+                    inf.epoch += 0.039450/86400.0

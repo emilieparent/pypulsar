@@ -1,1 +1,2 @@
-__all__ = ["datfile", "fbobs", "filterbank", "prestofft", "psrfits", "pulse", "wapp"]
+__all__ = ["datfile", "fbobs", "filterbank",
+           "prestofft", "psrfits", "pulse", "wapp"]
