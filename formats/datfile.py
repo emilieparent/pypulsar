@@ -13,7 +13,7 @@ import scipy.interpolate as interp
 
 import psr_utils
 import infodata
-from . import pulse
+import pulse
 
 # Define constants and default values
 DTYPE = 'float32'       # binary data in PRESTO's .dat files

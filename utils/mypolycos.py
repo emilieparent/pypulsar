@@ -12,7 +12,7 @@ import types
 import numpy as Num
 import parfile
 import psr_utils
-from . import telescopes
+import telescopes
 import infodata
 
 # Constants

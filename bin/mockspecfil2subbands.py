@@ -14,7 +14,7 @@ import numpy as np
 import sigproc
 
 import filterbank
-from . import coordconv
+import coordconv
 
 # Constants
 SAMPLES_PER_READ = 1024*4  # Number of samples to read at once

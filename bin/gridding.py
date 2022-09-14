@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 import psr_utils
 from pypulsar.utils import estimate_snr
-from . import pfd_snr
+import pfd_snr
 debug = 1
 
 

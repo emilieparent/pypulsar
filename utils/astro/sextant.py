@@ -9,8 +9,8 @@ import warnings
 import types
 import numpy as np
 
-from . import protractor
-from . import calendar
+import protractor
+import calendar
 
 
 def ha_from_lst(lst, ra):

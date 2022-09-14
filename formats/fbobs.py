@@ -11,7 +11,8 @@ Patrick Lazarus, May 9th, 2010
 """
 
 import numpy as np
-from . import filterbank
+import filterbank
+
 
 
 class fbobs:
