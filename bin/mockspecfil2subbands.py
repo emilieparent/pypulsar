@@ -14,7 +14,7 @@ import numpy as np
 import sigproc
 
 import filterbank
-import coordconv
+from . import coordconv
 
 # Constants
 SAMPLES_PER_READ = 1024*4 # Number of samples to read at once
@@ -45,7 +45,7 @@ def writeInfoFile(filfile):
                     basefilename)
                     
     telescope_id = filfile.header['telescope_id']
-    if telescope_id in sigproc.ids_to_telescope.keys():
+    if telescope_id in list(sigproc.ids_to_telescope.keys()):
         telescope = sigproc.ids_to_telescope[telescope_id]
     else:
         telescope = "????"
@@ -53,7 +53,7 @@ def writeInfoFile(filfile):
                     telescope)
                     
     machine_id = filfile.header['machine_id']
-    if machine_id in sigproc.ids_to_machine.keys():
+    if machine_id in list(sigproc.ids_to_machine.keys()):
         machine = sigproc.ids_to_machine[machine_id]
     else:
         machine = "????"

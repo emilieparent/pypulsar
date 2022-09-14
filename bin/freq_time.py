@@ -34,7 +34,7 @@ import rfifind
 def main():
     filfns = args # addtional argument is fileterbank files
     if options.debug:
-        print "Input filterbank files:", filfns
+        print("Input filterbank files:", filfns)
 
     obs = fbobs.fbobs(filfns)
     # filfile.print_header()
@@ -72,14 +72,14 @@ def main():
     numsamps = endsamp - startsamp
 
     if options.debug:
-        print "Requested start time: %s s (%d samples)" % \
-                    (options.start, reqstartsamp)
-        print "Actual start time: %s s (%d samples)" % \
-                    (startsamp*obs.tsamp, startsamp)
-        print "Requested end time: %s s (%d samples)" % \
-                    (options.end, reqendsamp)
-        print "Actual end time: %s s (%d samples)" % \
-                    (endsamp*obs.tsamp, endsamp)
+        print("Requested start time: %s s (%d samples)" % \
+                    (options.start, reqstartsamp))
+        print("Actual start time: %s s (%d samples)" % \
+                    (startsamp*obs.tsamp, startsamp))
+        print("Requested end time: %s s (%d samples)" % \
+                    (options.end, reqendsamp))
+        print("Actual end time: %s s (%d samples)" % \
+                    (endsamp*obs.tsamp, endsamp))
 
     # read data
     data = obs.get_sample_interval(startsamp, endsamp).astype('float32')
@@ -88,7 +88,7 @@ def main():
    
     if options.mask is not None:
         if options.debug:
-            print "Masking channels using %s" % options.mask
+            print("Masking channels using %s" % options.mask)
         # Mask channels
         mask = rfifind.rfifind(options.mask)
         maskchans = mask.mask_zap_chans
@@ -98,11 +98,11 @@ def main():
     # Modify data
     if options.downsamp > 1:
         if options.debug:
-            print "Downsampling by %d bins" % options.downsamp
+            print("Downsampling by %d bins" % options.downsamp)
         data = downsample(data, factor=options.downsamp)
     if options.width > 1:
         if options.debug:
-            print "Smoothing with boxcar %d bins wide" % options.width
+            print("Smoothing with boxcar %d bins wide" % options.width)
         data = smooth(data, factor=options.width)[options.width:-options.width,:]
         startsamp += options.width*options.downsamp
         endsamp -= options.width*options.downsamp
@@ -150,7 +150,7 @@ def main():
 
 def keypress(event):
     if event.key in ('q', 'Q'):
-        print "Closing..."
+        print("Closing...")
         plt.close()
 
 

@@ -118,7 +118,7 @@ def change_obsfreq(temp, oldfreq, newfreq, index=SYNCHROTRON_INDEX):
 
 
 def main():
-    deg_symb = unichr(176).encode("latin-1")
+    deg_symb = chr(176).encode("latin-1")
     
     galcoords = []
     if options.galcoords:
@@ -126,8 +126,8 @@ def main():
             galcoords.append((float(l), float(b)))
         for l, b in galcoords:
             temp = get_skytemp(l, b, freq=options.freq, index=options.index)
-            print "l=%g%s, b=%g%s, freq=%g, (index=%g): temp=%g K" % \
-                (l, deg_symb, b, deg_symb, options.freq, options.index, temp)
+            print("l=%g%s, b=%g%s, freq=%g, (index=%g): temp=%g K" % \
+                (l, deg_symb, b, deg_symb, options.freq, options.index, temp))
     else:
         sys.stderr.write("No coords provided on command line!\n")
     

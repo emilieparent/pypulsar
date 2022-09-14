@@ -44,7 +44,7 @@ def old_detrend(ydata, xdata=None, mask=None, order=1):
     else:
         unmasked = np.bitwise_not(mask) 
     x, resids, rank, s = scipy.linalg.lstsq(A[unmasked], ydata[unmasked])
-    print x
+    print(x)
     detrended =  ydata - np.dot(A, x)
     if DEBUG:
         fn = "mydetrend_%s.txt" % datetime.datetime.isoformat(datetime.datetime.now())

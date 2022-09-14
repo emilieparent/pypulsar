@@ -26,7 +26,7 @@ def create_polycos_from_inf(par, inf):
         Ouput:
             new_polycos: polycos object
     """
-    if type(inf) == types.StringType:
+    if type(inf) == bytes:
         # assume inf is a filename
         inf = infodata.infodata(inf)
     else:
@@ -198,8 +198,8 @@ def main():
         startsamp += nsamp
         igoodpoly += 1
     sys.stdout.write("\nDone\n")
-    print "Number of samples removed: %d" % nremoved
-    print "Number of samples added: %d" % nadded
+    print("Number of samples removed: %d" % nremoved)
+    print("Number of samples added: %d" % nadded)
 
     samps = np.concatenate((idrop, iadd)).astype('int32')
     isdrops = np.zeros_like(samps, dtype='int8')

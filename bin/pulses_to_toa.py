@@ -15,13 +15,13 @@ def main():
     cmp_mjd = lambda this, other: cmp(this.mjd, other.mjd)
     pulses.sort(cmp=cmp_mjd)
 
-    print "Number of pulses loaded: %d" % len(pulses)
+    print("Number of pulses loaded: %d" % len(pulses))
     if len(pulses):
         numtoas = 0
-        print "Generating TOAs. Please wait..."
-        print "TOA threshold:", options.toa_threshold
-        print "Min number of pulses for a TOA:", options.min_pulses
-        print "Profile template used:", options.template
+        print("Generating TOAs. Please wait...")
+        print("TOA threshold:", options.toa_threshold)
+        print("Min number of pulses for a TOA:", options.min_pulses)
+        print("Profile template used:", options.template)
         # Extract profile template file
         # (Note: first column is index, second column is profile values)
         template = np.loadtxt(options.template, usecols=(1,))
@@ -57,13 +57,13 @@ def main():
                 registry.append(pulsenums)
                 summed_pulse = None
                 numpulses = 0
-        print "Number of TOAs: %d" % numtoas
-        print "Number of pulses thrown out because 'min pulses' requirement " \
-                "or SNR threshold not met: %d" % numpulses
-        print "Registry of pulses:"
+        print("Number of TOAs: %d" % numtoas)
+        print("Number of pulses thrown out because 'min pulses' requirement " \
+                "or SNR threshold not met: %d" % numpulses)
+        print("Registry of pulses:")
         for i, pulsenums in enumerate(registry):
-            print "\tTOA #%d: %d pulses" % (i+1, len(pulsenums))
-            print "\t\t(pulse numbers: %s)" % ', '.join([str(n) for n in pulsenums])
+            print("\tTOA #%d: %d pulses" % (i+1, len(pulsenums)))
+            print("\t\t(pulse numbers: %s)" % ', '.join([str(n) for n in pulsenums]))
 
 
 def get_pulses(pulsefiles):

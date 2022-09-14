@@ -71,7 +71,7 @@ class filterbank:
         """
         self.read_header()
         for param in self.header_params:
-            print "%s: %s" % (param, self.header[param])
+            print("%s: %s" % (param, self.header[param]))
 
     def compute_frequencies(self):
         """Compute frequencies (in MHz) and store in 

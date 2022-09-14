@@ -227,15 +227,15 @@ class DDplan:
         while (self.obs.dt*self.get_next_downfact()) < self.resolution:
             self.current_downfact = self.get_next_downfact()
         if verbose:
-            print "        New dt is %d x %.12g s = %.12g s" % \
+            print("        New dt is %d x %.12g s = %.12g s" % \
                     (self.current_downfact, self.obs.dt, \
-                        self.current_downfact*self.obs.dt)
+                        self.current_downfact*self.obs.dt))
 
         # Calculate the appropriate initial dDM
         dDM = guess_DMstep(self.obs.dt*self.current_downfact, \
                             0.5*self.obs.BW, self.obs.fctr)
         if verbose:
-            print "Best guess for optimal initial dDM is %.3f" % dDM
+            print("Best guess for optimal initial dDM is %.3f" % dDM)
         while (self.get_next_dDM() < dDM):
             self.current_dDM = self.get_next_dDM()
         self.DDsteps.append(DDstep(self, self.current_downfact, \
@@ -302,25 +302,25 @@ class DDplan:
         self.resolution = self.best_resolution
         
         if verbose:
-            print
-            print "Minimum total smearing     : %.3g s" % self.min_total_smear
-            print "--------------------------------------------"
-            print "Minimum channel smearing   : %.3g s" % self.min_chan_smear
-            print "Minimum smearing across BW : %.3g s" % self.min_bw_smear
-            print "Minimum sample time        : %.3g s" % self.obs.dt
-            print
-            print "Setting the new 'best' resolution to : %.3g s" % self.best_resolution
+            print()
+            print("Minimum total smearing     : %.3g s" % self.min_total_smear)
+            print("--------------------------------------------")
+            print("Minimum channel smearing   : %.3g s" % self.min_chan_smear)
+            print("Minimum smearing across BW : %.3g s" % self.min_bw_smear)
+            print("Minimum sample time        : %.3g s" % self.obs.dt)
+            print()
+            print("Setting the new 'best' resolution to : %.3g s" % self.best_resolution)
 
         # See if the data is too high time resolution for our needs
         if (FF*self.min_chan_smear > self.obs.dt) or \
                 (self.resolution > self.obs.dt):
             if self.resolution > FF*self.min_chan_smear:
                 if verbose:
-                    print "   Note: resolution > dt (i.e. data is higher resolution than needed)"
+                    print("   Note: resolution > dt (i.e. data is higher resolution than needed)")
                 self.resolution = self.resolution
             else:
                 if verbose:
-                    print "   Note: min chan smearing > dt (i.e. data is higher resolution than needed)"
+                    print("   Note: min chan smearing > dt (i.e. data is higher resolution than needed)")
                 self.resolution = FF*self.min_chan_smear
 
     def plot(self, fn=None):
@@ -439,7 +439,7 @@ def main():
                         options.numchan, options.numsamp)
     ddplan = obs.gen_ddplan(options.loDM, options.hiDM, \
                             options.numsub, options.res, verbose=True)
-    print ddplan
+    print(ddplan)
     # Plot ddplan
     ddplan.plot(fn=options.outfile)
 

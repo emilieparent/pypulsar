@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 import psr_utils
 from pypulsar.utils import estimate_snr
-import pfd_snr
+from . import pfd_snr
 debug = 1
 
 def observed_snr(psrsnr, psrra, psrdec):
@@ -39,7 +39,7 @@ def fit(init_params, data):
     errorfunction = lambda p: np.ravel(observed_snr(*p)(ras, decs) - snrs)
     if debug:
         output = opt.leastsq(errorfunction, init_params, maxfev=10000, full_output=1)
-        print output[-1], output[-2]
+        print(output[-1], output[-2])
         p = output[0]
     else:
         p, success = opt.leastsq(errorfunction, init_params, maxfev=10000)
@@ -66,23 +66,23 @@ def main():
     observations = [pfd_snr.Observation(pfdfn) for pfdfn in sys.argv[1:]]
     data = np.array([(o.snr, o.ra, o.dec) for o in observations])
     if debug:
-        print "data:"
+        print("data:")
         for z in data:
-            print "\tSNR:", z[0], "RA:", z[1], "Dec:", z[2]
+            print("\tSNR:", z[0], "RA:", z[1], "Dec:", z[2])
     # Init guess is max SNR, weighted avg of RA, weighted avg of Dec
     data_T = data.transpose()
     init_params = (data_T[0].max(), (data_T[0]*data_T[1]).sum()/data_T[0].sum(), \
                         (data_T[0]*data_T[2]).sum()/data_T[0].sum())
     if debug:
-        print "initial parameters:"
-        print "\tSNR:", init_params[0], "RA:", init_params[1], "Dec:", init_params[2]
+        print("initial parameters:")
+        print("\tSNR:", init_params[0], "RA:", init_params[1], "Dec:", init_params[2])
     global beam_profile
     # Use gain = 1
     beam_profile = estimate_snr.EstimateFWHMSNR(3.35/2.0, 1420, 100, 2, 1, 24)
     result = fit(init_params, data) 
     if debug:
-        print "results:"
-        print "\tSNR:", result[0], "RA:", result[1], "Dec:", result[2]
+        print("results:")
+        print("\tSNR:", result[0], "RA:", result[1], "Dec:", result[2])
     psrsnr, psrra, psrdec = result
     snrs, ras, decs = data.transpose()
     plt.figure(figsize=(8.5,11))

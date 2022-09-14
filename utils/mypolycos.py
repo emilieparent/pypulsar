@@ -12,7 +12,7 @@ import types
 import numpy as Num
 import parfile
 import psr_utils
-import telescopes
+from . import telescopes
 import infodata
 
 # Constants
@@ -114,7 +114,7 @@ class polycos:
             self.TMIDs.append(tmppoly.TMID)
             tmppoly = polyco(infile)
         if VERBOSE:
-            print "Success! Read %d polycos\n" % len(self.polycos)
+            print("Success! Read %d polycos\n" % len(self.polycos))
         self.TMIDs = Num.asarray(self.TMIDs)
         infile.close()
         self.validrange = 0.5*self.dataspan/1440.0
@@ -183,7 +183,7 @@ def create_polycos_from_inf(par, infdata):
         Ouput:
             new_polycos: polycos object
     """
-    if type(infdata)==types.StringType:
+    if type(infdata)==bytes:
         # assume infdata is a filename
         infdata = infodata.infodata(infdata)
     else:
@@ -230,7 +230,7 @@ def create_polycos(par, telescope_id, center_freq, start_mjd, end_mjd, \
         Output:
             new_polycos: a polycos object.
     """
-    if type(par)==types.StringType:
+    if type(par)==bytes:
         # assume par is a filename
         par = parfile.psr_par(par)
     else:

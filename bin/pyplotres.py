@@ -219,7 +219,7 @@ class Resids:
         """Return label describing xaxis and the corresponding 
             data given keyword 'key'.
         """
-        if not isinstance(key, types.StringType):
+        if not isinstance(key, bytes):
             raise ValueError("key must be of type string.")
         xopt = key.lower()
         if xopt == 'numtoa':
@@ -244,7 +244,7 @@ class Resids:
             'postfit' is a boolean argument that determines if
             postfit, or prefit data is to be returned.
         """
-        if not isinstance(key, types.StringType):
+        if not isinstance(key, bytes):
             raise ValueError("key must be of type string.")
         yopt = key.lower()
         if postfit:
@@ -357,7 +357,7 @@ def plot_data(tempo_results, xkey, ykey, postfit=True, prefit=False, \
                 if xkey == 'mjd':
                     plt.axvline(peri_mjd, ls=':', label='_nolegend_', c='k', lw=0.5)
                 elif xkey == 'year':
-                    print "plotting peri passage"
+                    print("plotting peri passage")
                     plt.axvline(calendar.MJD_to_year(peri_mjd), ls=':', label='_nolegend_', c='k', lw=0.5)
             plt.xlim((xmin, xmax))
         plt.xlabel(xlabel)
@@ -403,13 +403,13 @@ def get_freq_label(lo, hi):
 
 
 def savefigure(savefn='./resid2.tmp.ps'):
-    print "Saving plot to %s" % savefn
+    print("Saving plot to %s" % savefn)
     plt.savefig(savefn, orientation='landscape', papertype='letter')
 
 
 def reloadplot():
     # Reload residuals and replot
-    print "Plotting..."
+    print("Plotting...")
     fig = plt.gcf()
     fig.set_visible(False)
     plt.clf() # clear figure
@@ -419,9 +419,9 @@ def reloadplot():
                 postfit=options.postfit, prefit=options.prefit, \
                 interactive=options.interactive, \
                 mark_peri=options.mark_peri, show_legend=options.legend)
-    except EmptyPlotValueError, msg:
-        print msg
-        print "Press 'p'/'P' to add prefit/postfit plot."
+    except EmptyPlotValueError as msg:
+        print(msg)
+        print("Press 'p'/'P' to add prefit/postfit plot.")
         plt.figtext(0.5, 0.5, (str(msg) + "\n" + \
                         "Press 'p'/'P' to add prefit/postfit plot."), \
                     horizontalalignment='center', \
@@ -436,7 +436,7 @@ def redrawplot():
 
 
 def quit():
-    print "Quiting..."
+    print("Quiting...")
     sys.exit(0)
 
 
@@ -452,37 +452,37 @@ def pick(event):
         info = tempo_results.get_info(freq_label, index, postfit)
         print_text(info)
     else:
-        print "Multiple TOAs selected. Zoom in and try again."
+        print("Multiple TOAs selected. Zoom in and try again.")
 
 
 def print_text(lines, *args, **kwargs):
     """Print lines of text (in a list) in the terminal."""
-    print '\n'.join(lines)
+    print('\n'.join(lines))
 
 
 def print_help():
     # Display help
-    print "Helping..."
-    print "-"*80
-    print "Help - Hotkeys definitions:"
-    print "\th - Display this help"
-    print "\tq - Quit"
-    print "\ts - Save current plot(s) to PostScript file"
-    print "\tp - Toggle prefit display on/off"
-    print "\tP - Toggle postfit display on/off"
-    print "\tz - Toggle Zoom-mode on/off"
-    print "\tL - Toggle legend on/off"
-    print "\to - Go to original view"
-    print "\t< - Go to previous view"
-    print "\t> - Go to next view"
-    print "\tx - Set x-axis limits (terminal input required)"
-    print "\ty - Sey y-axis limits (terminal input required)"
-    print "\tr - Reload residuals"
-    print "\tt - Cycle through y-axis types ('phase', 'usec', 'sec')"
-    print "\t[Space] - Cycle through x-axis types ('MJD', 'year', 'numTOA', 'orbitphase')"
-    print "\t[Left mouse] - Select TOA (display info in terminal)"
-    print "\t             - Select zoom region (if Zoom-mode is on)"
-    print "-"*80
+    print("Helping...")
+    print("-"*80)
+    print("Help - Hotkeys definitions:")
+    print("\th - Display this help")
+    print("\tq - Quit")
+    print("\ts - Save current plot(s) to PostScript file")
+    print("\tp - Toggle prefit display on/off")
+    print("\tP - Toggle postfit display on/off")
+    print("\tz - Toggle Zoom-mode on/off")
+    print("\tL - Toggle legend on/off")
+    print("\to - Go to original view")
+    print("\t< - Go to previous view")
+    print("\t> - Go to next view")
+    print("\tx - Set x-axis limits (terminal input required)")
+    print("\ty - Sey y-axis limits (terminal input required)")
+    print("\tr - Reload residuals")
+    print("\tt - Cycle through y-axis types ('phase', 'usec', 'sec')")
+    print("\t[Space] - Cycle through x-axis types ('MJD', 'year', 'numTOA', 'orbitphase')")
+    print("\t[Left mouse] - Select TOA (display info in terminal)")
+    print("\t             - Select zoom region (if Zoom-mode is on)")
+    print("-"*80)
 
 
 def keypress(event):
@@ -490,7 +490,7 @@ def keypress(event):
     global options
     global xind, xvals
     global yind, yvals
-    if type(event.key) == types.StringType:
+    if type(event.key) == bytes:
         if event.key.lower() == 'q':
             quit()
         elif event.key.lower() == 's':
@@ -504,75 +504,75 @@ def keypress(event):
             redrawplot()
         elif event.key.lower() == 'z':
             # Turn on zoom mode
-            print "Toggling zoom mode..."
+            print("Toggling zoom mode...")
             event.canvas.toolbar.zoom()
         elif event.key.lower() == 'o':
             # Restore plot to original view
-            print "Restoring plot..."
+            print("Restoring plot...")
             event.canvas.toolbar.home()
         elif event.key.lower() == ',' or event.key.lower() == '<':
             # Go back to previous plot view
-            print "Going back..."
+            print("Going back...")
             event.canvas.toolbar.back()
         elif event.key.lower() == '.' or event.key.lower() == '>':
             # Go forward to next plot view
-            print "Going forward..."
+            print("Going forward...")
             event.canvas.toolbar.forward()
         elif event.key.lower() == ' ':
             xind = (xind + 1) % len(xvals)
-            print "Toggling plot type...[%s]"%xvals[xind], xind
+            print("Toggling plot type...[%s]"%xvals[xind], xind)
             options.xaxis = xvals[xind]
             reloadplot()
         elif event.key.lower() == 't':
             yind = (yind + 1) % len(yvals)
-            print "Toggling plot scale...[%s]"%yvals[yind], yind
+            print("Toggling plot scale...[%s]"%yvals[yind], yind)
             options.yaxis = yvals[yind]
             reloadplot()
         elif event.key == 'p':
             options.prefit = not options.prefit
-            print "Toggling prefit-residuals display to: %s" % \
-                    ((options.prefit and "ON") or "OFF")
+            print("Toggling prefit-residuals display to: %s" % \
+                    ((options.prefit and "ON") or "OFF"))
             reloadplot()
         elif event.key == 'P':
             options.postfit = not options.postfit
-            print "Toggling postfit-residuals display to: %s" % \
-                    ((options.postfit and "ON") or "OFF")
+            print("Toggling postfit-residuals display to: %s" % \
+                    ((options.postfit and "ON") or "OFF"))
             reloadplot()
         elif event.key.lower() == 'x':
             # Set x-axis limits
-            print "Setting x-axis limits. User input required..."
-            xmin = raw_input("X-axis minimum: ")
-            xmax = raw_input("X-axis maximum: ")
+            print("Setting x-axis limits. User input required...")
+            xmin = input("X-axis minimum: ")
+            xmax = input("X-axis maximum: ")
             try:
                 xmin = float(xmin)
                 xmax = float(xmax)
                 if xmax <= xmin:
                     raise ValueError
             except ValueError:
-                print "Bad values provided!"
+                print("Bad values provided!")
                 return
             plt.xlim(xmin, xmax)
         elif event.key.lower() == 'y':
             global axes
             # Set y-axis limits
-            print "Setting y-axis limits. User input required..."
+            print("Setting y-axis limits. User input required...")
             if len(axes) == 2:
-                axes_to_adjust = raw_input("Axes to adjust (pre/post): ")
+                axes_to_adjust = input("Axes to adjust (pre/post): ")
                 if axes_to_adjust.lower().startswith('pre'):
                     plt.axes(axes[0])
                 elif axes_to_adjust.lower().startswith('post'):
                     plt.axes(axes[1])
                 else:
                     raise ValueError
-            ymin = raw_input("Y-axis minimum: ")
-            ymax = raw_input("Y-axis maximum: ")
+            ymin = input("Y-axis minimum: ")
+            ymax = input("Y-axis maximum: ")
             try:
                 ymin = float(ymin)
                 ymax = float(ymax)
                 if ymax <= ymin:
                     raise ValueError
             except ValueError:
-                print "Bad values provided!"
+                print("Bad values provided!")
                 return
             plt.ylim(ymin, ymax)
         elif event.key.lower() == 'h':
@@ -640,7 +640,7 @@ def main():
         
         # Before setting up our own event handlers delete matplotlib's
         # default 'key_press_event' handler.
-        defcids = fig.canvas.callbacks.callbacks['key_press_event'].keys()
+        defcids = list(fig.canvas.callbacks.callbacks['key_press_event'].keys())
         for cid in defcids:
             fig.canvas.callbacks.disconnect(cid)
         

@@ -53,7 +53,7 @@ def output_harm(a, b):
 def main():
     num = float(sys.argv[1])
     den = float(sys.argv[2])
-    print output_harm(num, den)
+    print(output_harm(num, den))
 
 if __name__ == '__main__':
     main()

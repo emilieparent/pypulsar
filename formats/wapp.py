@@ -25,7 +25,7 @@ import pycparser
 class wapp:
     def __init__(self, wappfn):
         if not os.path.isfile(wappfn):
-            print "ERROR: File does not exist!\n\t(%s)" % wappfn
+            print("ERROR: File does not exist!\n\t(%s)" % wappfn)
             self = None
             return
         else:

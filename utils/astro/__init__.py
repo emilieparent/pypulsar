@@ -1,6 +1,6 @@
 __all__ = ['calendar', 'clock', 'protractor', 'sextant']
 
-import calendar
-import clock
-import protractor
-import sextant
+from . import calendar
+from . import clock
+from . import protractor
+from . import sextant

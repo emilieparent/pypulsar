@@ -41,6 +41,6 @@ def show_progress(iterator, width=0, tot=None, fmt="%d", show_number=False):
             sys.stdout.flush()
         curr += 1
         yield toreturn
-    print "Done"
+    print("Done")
 
 

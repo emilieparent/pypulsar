@@ -100,7 +100,7 @@ def date_to_JD(year, month, day, gregorian=True):
     
         (Follow Jean Meeus' Astronomical Algorithms, 2nd Ed., Ch. 7)
     """
-    if type(month) == types.StringType:
+    if type(month) == bytes:
         month = month_to_num(month)
     
     year = np.copy(np.atleast_1d(year))
@@ -341,7 +341,7 @@ def month_to_num(month):
         month = [month]
     nums = []
     for m in month:
-        if type(m) != types.StringType:
+        if type(m) != bytes:
             raise TypeError("month must be of type string. type(month): %s" % \
                                 type(m))
         if m not in MONTH_TO_NUM:
@@ -359,7 +359,7 @@ def num_to_month(month):
         month = [month]
     strings = []
     for m in month:
-        if type(m) not in (types.IntType, np.int32, np.int64):
+        if type(m) not in (int, np.int32, np.int64):
             raise TypeError("month must be of type integer. type(month): %s" % \
                                 type(m))
         if m not in NUM_TO_MONTH:

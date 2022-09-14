@@ -58,7 +58,7 @@ class Pulse:
         self.chan_width = chan_width
         self.bw = bw
         self.origfn = origfn
-        if (type(on_pulse_regions)==types.ListType or \
+        if (type(on_pulse_regions)==list or \
                 type(on_pulse_regions)==np.ndarray) and len(on_pulse_regions):
             self.set_onoff_pulse_regions(on_pulse_regions)
         else:
@@ -424,8 +424,8 @@ class SummedPulse(Pulse):
             # Merge other's registry into self's registry
             # If there is a conflict, pulse is included in
             # self and other, then raise an Exception.
-            for fn in other.pulse_registry.keys():
-                if fn in self.pulse_registry.keys():
+            for fn in list(other.pulse_registry.keys()):
+                if fn in list(self.pulse_registry.keys()):
                     for num in other.pulse_registry[fn]:
                         if num in self.pulse_registry[fn]:
                             # Conflict
@@ -438,7 +438,7 @@ class SummedPulse(Pulse):
             ocount = other.count
         else:
             # 'other' is a Pulse, not SummedPulse
-            if other.origfn in self.pulse_registry.keys():
+            if other.origfn in list(self.pulse_registry.keys()):
                 self.pulse_registry[other.origfn].append(other.number)
             else:
                 self.pulse_registry[other.origfn] = [other.number]
@@ -481,13 +481,13 @@ class SummedPulse(Pulse):
             it is listed in self's registry.
         """
         if hasattr(item, 'pulse_registry'):
-            for fn in item.pulse_registry.keys():
-                if fn in self.pulse_registry.keys():
+            for fn in list(item.pulse_registry.keys()):
+                if fn in list(self.pulse_registry.keys()):
                     for num in item.pulse_registry[fn]:
                         if num in self.pulse_registry[fn]:
                             return True
         else:
-            if item.origfn in self.pulse_registry.keys() and \
+            if item.origfn in list(self.pulse_registry.keys()) and \
                 item.number in self.pulse_registry[item.origfn]:
                 return True
         return False
@@ -517,7 +517,7 @@ class SummedPulse(Pulse):
                 file.write("# On-pulse region %2d (phase)      = %f-%f\n" % \
                                                                     (i,lo,hi))
         file.write("# Number of profiles summed       = %d\n" % self.count)
-        for fn in self.pulse_registry.keys():
+        for fn in list(self.pulse_registry.keys()):
             for num in sorted(self.pulse_registry[fn]):
                 file.write("# Pulse registry                  = %s:%d\n" % \
                                                                     (fn, num))

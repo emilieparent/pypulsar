@@ -11,7 +11,7 @@ Patrick Lazarus, May 9th, 2010
 """
 
 import numpy as np
-import filterbank
+from . import filterbank
 
 class fbobs:
     """A filterbank observation class."""

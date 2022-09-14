@@ -89,7 +89,7 @@ def main():
 						fill=True, fc='r', ec='none', \
 						alpha=0.25, zorder=-1)
 	    plt.gca().add_patch(r)
-	    print i.zaplist_string()
+	    print(i.zaplist_string())
     plt.xlabel("Spin Frequency (Hz)")
     plt.ylabel("File number (index)")
     hax = plt.axes((0.8, 0.1, 0.15, 0.7), sharey=ebax)

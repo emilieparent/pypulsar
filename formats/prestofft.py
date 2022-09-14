@@ -106,7 +106,7 @@ class PrestoFFT:
         nn = self.fft.size
         harmsummed = np.copy(self.powers[:nn/nharm])
 
-        for nh in xrange(2, nharm+1):
+        for nh in range(2, nharm+1):
             harmsummed += np.reshape(self.powers[:nn/nh*nh], (-1, nh))[:,0][:nn/nharm]
         return harmsummed
 
@@ -123,7 +123,7 @@ class PrestoFFT:
         nn = self.fft.size
         harmsummed = np.copy(self.powers)
         
-        for nh in xrange(2, 1+nharm):
+        for nh in range(2, 1+nharm):
             r = np.arange(nn)/float(nh)
             harmsummed += np.abs(self.interpolate(r, 2))**2
         return harmsummed, self.freqs/float(nharm)
@@ -141,7 +141,7 @@ class PrestoFFT:
         nn = self.fft.size
         harmsummed = np.copy(self.fft)
         
-        for nh in xrange(2, 1+nharm):
+        for nh in range(2, 1+nharm):
             r = np.arange(nn)/float(nh)
             harmsummed += self.interpolate(r, 2)
         return np.abs(harmsummed)**2, self.freqs/float(nharm)
@@ -239,9 +239,9 @@ class PrestoFFT:
             if self.inf.DM > 0:
                 tdm = psr_utils.dm_smear(self.inf.DM, self.inf.BW, self.inf.lofreq+0.5*self.inf.BW)
                 freqlim = 1.0/tdm
-                print "Dispersion smearing time: %.2f ms" % (1000.0*tdm)
+                print("Dispersion smearing time: %.2f ms" % (1000.0*tdm))
             freqlim = min(10.0, freqlim)
-            print "Only fitting using frequencies up to %.2f Hz" % freqlim
+            print("Only fitting using frequencies up to %.2f Hz" % freqlim)
         iuse = (self.freqs<freqlim)
         iuse[0] = 0 # Always ignore zeroth element
         
@@ -434,9 +434,9 @@ def main():
     plparams = args.powerlaw
     if args.do_fit:
         powerlaw = pfft.fit_powers(freqlim=args.freq_lim)
-        print "Amplitude:", powerlaw['amp']
-        print "Index:", powerlaw['index']
-        print "DC offset:", powerlaw['dc']
+        print("Amplitude:", powerlaw['amp'])
+        print("Index:", powerlaw['index'])
+        print("DC offset:", powerlaw['dc'])
         plparams.append((powerlaw['amp'], powerlaw['index'], powerlaw['dc']))
         write_powerlaw_to_file(powerlaw, pfftfn, outfn=(pfftfn+".plp"))
     if args.do_plot:

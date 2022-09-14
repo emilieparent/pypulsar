@@ -63,7 +63,7 @@ def get_resids(profdata, modeldata, scale=1, dc=0):
 
 
 def find_scale_and_phase(profdata, modeldata):
-    to_optimize = lambda (scale, dc): get_resids(profdata, modeldata, scale, dc)
+    to_optimize = lambda scale_dc: get_resids(profdata, modeldata, scale_dc[0], scale_dc[1])
     init_params = [1, 0] # Initial multiplicative scale factor
     fit = leastsq(to_optimize, init_params)
     return fit
@@ -93,7 +93,7 @@ def read_gaussfitfile(gaussfitfile, proflen):
         if line.lstrip().startswith("const"):
             const = float(line.split()[2])
     if not (len(phass) == len(ampls) == len(fwhms)):
-        print "Number of phases, amplitudes, and FWHMs are not the same in '%s'!"%gaussfitfile
+        print("Number of phases, amplitudes, and FWHMs are not the same in '%s'!"%gaussfitfile)
         return 0.0
     phass = np.asarray(phass)
     ampls = np.asarray(ampls)
@@ -239,11 +239,11 @@ class ObservationWithModel:
                     (event.mouseevent.button == 1):
             ind = self.compartists.index(event.artist)
             if ind in self.on_pulse:
-                print "Component %d un-selected" % ind
+                print("Component %d un-selected" % ind)
                 self.on_pulse.remove(ind)
                 event.artist.set_linewidth(1)
             else:
-                print "Component %d selected as on-pulse" % ind
+                print("Component %d selected as on-pulse" % ind)
                 self.on_pulse.add(ind)
                 event.artist.set_linewidth(2)
             self.fig.canvas.draw()
@@ -289,19 +289,19 @@ class ObservationWithModel:
         self.snr = area/std/np.sqrt(self.weq)
         if self.verbose:
             if debug:
-                print "Equivalent width (bins):", self.weq
-                print "Std-dev correction factor:", self.p.DOF_corr()
-                print "Std-dev corrected for correlations between phase bins:", std
-                print "Integral under the selected pulse components:", \
-                        area
-            print "SNR:", self.snr
+                print("Equivalent width (bins):", self.weq)
+                print("Std-dev correction factor:", self.p.DOF_corr())
+                print("Std-dev corrected for correlations between phase bins:", std)
+                print("Integral under the selected pulse components:", \
+                        area)
+            print("SNR:", self.snr)
 
         if self.sefd is not None:
             npol = 2  # prepfold files only contain total-intensity
                       # (i.e. both polarisations summed)
             self.smean = self.snr*self.sefd/np.sqrt(npol*self.p.T*self.bw)*np.sqrt(self.weq/(len(self.prof)-self.weq))
             if self.verbose:
-                print "Mean flux density (mJy):", self.smean
+                print("Mean flux density (mJy):", self.smean)
     
     def mousepress(self, event):
         if (event.inaxes == self.residax) and event.button==1:
@@ -461,11 +461,11 @@ class ObservationWithGauss:
                     (event.mouseevent.button == 1):
             ind = self.compartists.index(event.artist)
             if ind in self.on_pulse:
-                print "Component %d un-selected" % ind
+                print("Component %d un-selected" % ind)
                 self.on_pulse.remove(ind)
                 event.artist.set_linewidth(1)
             else:
-                print "Component %d selected as on-pulse" % ind
+                print("Component %d selected as on-pulse" % ind)
                 self.on_pulse.add(ind)
                 event.artist.set_linewidth(2)
             self.fig.canvas.draw()
@@ -511,19 +511,19 @@ class ObservationWithGauss:
         self.snr = area/std/np.sqrt(self.weq)
         if self.verbose:
             if debug:
-                print "Equivalent width (bins):", self.weq
-                print "Std-dev correction factor:", self.p.DOF_corr()
-                print "Std-dev corrected for correlations between phase bins:", std
-                print "Integral under the selected pulse components:", \
-                        area
-            print "SNR:", self.snr
+                print("Equivalent width (bins):", self.weq)
+                print("Std-dev correction factor:", self.p.DOF_corr())
+                print("Std-dev corrected for correlations between phase bins:", std)
+                print("Integral under the selected pulse components:", \
+                        area)
+            print("SNR:", self.snr)
 
         if self.sefd is not None:
             npol = 2  # prepfold files only contain total-intensity
                       # (i.e. both polarisations summed)
             self.smean = self.snr*self.sefd/np.sqrt(npol*self.p.T*self.bw)*np.sqrt(self.weq/(len(self.prof)-self.weq))
             if self.verbose:
-                print "Mean flux density (mJy):", self.smean
+                print("Mean flux density (mJy):", self.smean)
     
     def mousepress(self, event):
         if (event.inaxes == self.residax) and event.button==1:
@@ -602,7 +602,7 @@ class Observation:
         imax = np.argmax(prof)
         self.nrot = (imax-len(prof)/2) % len(prof)
         if self.verbose:
-            print "Profile maximum at bin %d. Rotating by %d bins." % (imax, self.nrot)
+            print("Profile maximum at bin %d. Rotating by %d bins." % (imax, self.nrot))
         self.prof = np.asarray(psr_utils.rotate(prof, self.nrot))
         
         self.region_start = None
@@ -686,15 +686,15 @@ class Observation:
         self.weq = area/profmax
         self.snr = area/std/np.sqrt(self.weq)
         if self.verbose:
-            print "Number of bins selected: %d (%f phase)" % \
-                    (nbins_selected, nbins_selected/float(len(self.prof)))
+            print("Number of bins selected: %d (%f phase)" % \
+                    (nbins_selected, nbins_selected/float(len(self.prof))))
             if debug:
-                print "Equivalent width (bins):", self.weq
-                print "Std-dev corrected for correlations between phase bins:", std
-                print "Off-pulse mean:", mean
-                print "Integral under the mean-subtracted on-pulse region:", \
-                        area
-            print "SNR:", self.snr
+                print("Equivalent width (bins):", self.weq)
+                print("Std-dev corrected for correlations between phase bins:", std)
+                print("Off-pulse mean:", mean)
+                print("Integral under the mean-subtracted on-pulse region:", \
+                        area)
+            print("SNR:", self.snr)
 
         if self.sefd is not None:
             npol = 2  # prepfold files only contain total-intensity
@@ -702,7 +702,7 @@ class Observation:
             bw = self.p.chan_wid*self.p.numchan
             self.smean = self.snr*self.sefd/np.sqrt(npol*self.p.T*bw)*np.sqrt(self.weq/(len(self.prof)-self.weq))
             if self.verbose:
-                print "Mean flux density (mJy):", self.smean
+                print("Mean flux density (mJy):", self.smean)
     
     def keypress(self, event):
         if event.key == ' ':
@@ -718,7 +718,7 @@ class Observation:
 
 def main():
     for pfdfn in args.files:
-        print pfdfn
+        print(pfdfn)
         pfd = prepfold.pfd(pfdfn)
         if args.sefd is not None:
             sefd = args.sefd
@@ -727,15 +727,15 @@ def main():
             glon, glat = sextant.equatorial_to_galactic(pfd.rastr, pfd.decstr, 
                                                         input='sexigesimal', 
                                                         output='deg')
-            print "Galactic Coords: l=%g deg, b=%g deg" % (glon, glat)
+            print("Galactic Coords: l=%g deg, b=%g deg" % (glon, glat))
             tsky = skytemp.get_skytemp(glon, glat, freq=fctr)[0]
-            print "Sky temp at %g MHz: %g K" % (fctr, tsky)
+            print("Sky temp at %g MHz: %g K" % (fctr, tsky))
             sefd = (args.tsys+tsky)/args.gain
-        print sefd, args.fwhm, args.sep
+        print(sefd, args.fwhm, args.sep)
         if (sefd is not None) and (args.fwhm is not None) and (args.sep is not None):
             factor = estimate_snr.airy_pattern(args.fwhm, args.sep)
-            print "Pulsar is off-centre"
-            print "Reducing SEFD by factor of %g (SEFD: %g->%g)" % (factor, sefd, sefd/factor)
+            print("Pulsar is off-centre")
+            print("Reducing SEFD by factor of %g (SEFD: %g->%g)" % (factor, sefd, sefd/factor))
             sefd /= factor
         if args.model_file is not None:
             obs = ObservationWithModel(pfd, args.model_file, sefd=sefd, verbose=True)
@@ -744,7 +744,7 @@ def main():
         else:
             obs = Observation(pfd, sefd=sefd, verbose=True)
         plt.show()
-        print " ".join(obs.notes)
+        print(" ".join(obs.notes))
 
 
 if __name__ == '__main__':
